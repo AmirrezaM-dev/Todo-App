@@ -28,7 +28,7 @@ const login = asyncHandler(async (req, res) => {
 
 			res.cookie("lt", token, {
 				path: "/",
-				sameSite: "Strict",
+				sameSite: "none",
 				maxAge: 99999999,
 				secure: true,
 			})
@@ -49,8 +49,7 @@ const login = asyncHandler(async (req, res) => {
 		}
 	} catch (error) {
 		res.status(422)
-		if (error.message === "Invalid credentials")
-			throw new Error(error.message)
+		if (error.message === "Invalid credentials") throw new Error(error.message)
 		else throw new Error("Something went wrong")
 	}
 })
