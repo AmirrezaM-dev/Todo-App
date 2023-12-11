@@ -8,7 +8,7 @@ export function useMain() {
 }
 
 const MainComponent = ({ children }) => {
-	const apiUrl = "http://localhost:9000/"
+	const apiUrl = "https://todoserver-g7to.onrender.com/"
 	const [appLoaded, setAppLoaded] = useState(false)
 	const location = useLocation()
 	const [displayLocation, setDisplayLocation] = useState(location)
