@@ -33,8 +33,7 @@ const AuthProvider = ({ children }) => {
 			toast.addEventListener("mouseleave", Swal.resumeTimer)
 		},
 	})
-	const { apiUrl, setAppLoaded, setTransitionStages, transitionStages } =
-		useMain()
+	const { apiUrl, setAppLoaded, setTransitionStages, transitionStages } = useMain()
 	const [user, setUser] = useState({})
 	const [loadingLogin, setLoadingLogin] = useState(false)
 	const [loggedIn, setLoggedIn] = useState()
@@ -59,15 +58,7 @@ const AuthProvider = ({ children }) => {
 				})
 				.finally(() => setAppLoaded(true))
 		}
-	}, [
-		authApi,
-		loadingLogin,
-		loggedIn,
-		navigate,
-		pathname,
-		setAppLoaded,
-		user,
-	])
+	}, [authApi, loadingLogin, loggedIn, navigate, pathname, setAppLoaded, user])
 	const login = (formData) => {
 		const { username, password } = formData
 		if (username.length && password.length) {
@@ -98,11 +89,7 @@ const AuthProvider = ({ children }) => {
 							...transitionStages,
 							submitText: "Sign In",
 						})
-						if (
-							e.response &&
-							e.response.data &&
-							e.response.data.message
-						)
+						if (e.response && e.response.data && e.response.data.message)
 							Toast.fire({
 								icon: "error",
 								title: e.response.data.message,
@@ -145,11 +132,7 @@ const AuthProvider = ({ children }) => {
 							...transitionStages,
 							submitText: "Sign Up",
 						})
-						if (
-							e.response &&
-							e.response.data &&
-							e.response.data.message
-						)
+						if (e.response && e.response.data && e.response.data.message)
 							Toast.fire({
 								icon: "error",
 								title: e.response.data.message,

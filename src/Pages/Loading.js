@@ -4,23 +4,13 @@ import { Col, Container, Row } from "react-bootstrap"
 import { useMain } from "../Components/useMain"
 
 const Loading = () => {
-	const {
-		setDisplayLocation,
-		transitionStages,
-		setTransitionStages,
-		location,
-	} = useMain()
+	const { setDisplayLocation, transitionStages, setTransitionStages, location } = useMain()
 
 	return (
-		<div
-			className={`login bg-dark bg-gradient text-white min-vh-100 d-flex align-items-center px-5`}
-		>
+		<div className={`login bg-dark bg-gradient text-white min-vh-100 d-flex align-items-center px-0 px-md-5`}>
 			<Container fluid>
 				<Row className="mx-auto">
-					<Col
-						sm={8}
-						className="border rounded rounded-5 overflow-hidden shadow shadow-lg mx-auto"
-					>
+					<Col sm={12} className="border rounded rounded-5 overflow-hidden shadow shadow-lg mx-auto">
 						<Row>
 							<Col
 								sm={12}
@@ -35,12 +25,7 @@ const Loading = () => {
 									setDisplayLocation(location)
 								}}
 							>
-								<FontAwesomeIcon
-									size="10x"
-									icon={faSpinner}
-									spin
-									className="my-5"
-								/>
+								<FontAwesomeIcon size="10x" icon={faSpinner} spin className="my-5" />
 							</Col>
 						</Row>
 					</Col>

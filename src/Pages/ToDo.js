@@ -219,53 +219,56 @@ const ToDo = () => {
 	useEffect(() => {
 		if (!todos[date]) {
 			setShowLoading(true)
-			authApi.post("api/todo/get", { date }).then((response) => {
-				let newTodos = {},
-					childrenTodos = {}
-				response.data.ToDos.map((newTodo) => (newTodos = { ...newTodos, [newTodo._id]: newTodo }))
-				response.data.ToDosChildren.map(
-					(childrenTodo) =>
-						(childrenTodos = {
-							...childrenTodos,
-							[childrenTodo.parent]: {
-								...childrenTodos[childrenTodo.parent],
-								[childrenTodo._id]: childrenTodo,
-							},
-						})
-				)
-				if (!todos.important) {
-					authApi
-						.post("api/todo/getImportant", { date })
-						.then((response) => {
-							let importantTodos = {}
-							response.data.ToDos.map(
-								(importantTodo) =>
-									(importantTodos = {
-										...importantTodos,
-										[importantTodo._id]: importantTodo,
-									})
-							)
-							setTodos((todos) => {
-								return {
-									...todos,
-									important: importantTodos,
-									[date]: newTodos,
-									[date + "_children"]: childrenTodos,
-								}
+			authApi
+				.post("api/todo/get", { date })
+				.then((response) => {
+					let newTodos = {},
+						childrenTodos = {}
+					response.data.ToDos.map((newTodo) => (newTodos = { ...newTodos, [newTodo._id]: newTodo }))
+					response.data.ToDosChildren.map(
+						(childrenTodo) =>
+							(childrenTodos = {
+								...childrenTodos,
+								[childrenTodo.parent]: {
+									...childrenTodos[childrenTodo.parent],
+									[childrenTodo._id]: childrenTodo,
+								},
 							})
+					)
+					if (!todos.important) {
+						authApi
+							.post("api/todo/getImportant", { date })
+							.then((response) => {
+								let importantTodos = {}
+								response.data.ToDos.map(
+									(importantTodo) =>
+										(importantTodos = {
+											...importantTodos,
+											[importantTodo._id]: importantTodo,
+										})
+								)
+								setTodos((todos) => {
+									return {
+										...todos,
+										important: importantTodos,
+										[date]: newTodos,
+										[date + "_children"]: childrenTodos,
+									}
+								})
+							})
+							.finally(() => setShowLoading(false))
+					} else {
+						setShowLoading(false)
+						setTodos((todos) => {
+							return {
+								...todos,
+								[date]: newTodos,
+								[date + "_children"]: childrenTodos,
+							}
 						})
-						.finally(() => setShowLoading(false))
-				} else {
-					setShowLoading(false)
-					setTodos((todos) => {
-						return {
-							...todos,
-							[date]: newTodos,
-							[date + "_children"]: childrenTodos,
-						}
-					})
-				}
-			})
+					}
+				})
+				.catch(() => {})
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [date])
@@ -275,10 +278,10 @@ const ToDo = () => {
 				path="/"
 				element={
 					appLoaded && loggedIn && !showLoading ? (
-						<div className={`bg-dark bg-gradient text-white min-vh-100 d-flex align-items-center px-5`}>
+						<div className={`bg-dark bg-gradient text-white min-vh-100 d-flex align-items-center px-0 px-md-5`}>
 							<Container fluid>
 								<Row className="mx-auto">
-									<Col sm={8} className="border rounded rounded-5 overflow-hidden shadow shadow-lg mx-auto">
+									<Col sm={12} className="border rounded rounded-5 overflow-hidden shadow shadow-lg mx-auto">
 										<Row className="fadeOut">
 											<Col
 												sm={12}
@@ -293,32 +296,41 @@ const ToDo = () => {
 													setDisplayLocation(location)
 												}}
 											>
-												<Navbar data-bs-theme="dark" className="border-bottom mb-3">
+												<Navbar expand={"sm"} data-bs-theme="dark" className="border-bottom mb-3">
 													<Container>
-														<Navbar.Brand href="#home">To Do App</Navbar.Brand>
-														<Navbar.Collapse className="justify-content-center">
-															<Nav className="mx-auto">
-																<Form.Control type="date" onChange={(e) => setDate(e.target.value)} value={date} placeholder="name@example.com" />
-															</Nav>
-														</Navbar.Collapse>
+														<Navbar.Brand>To Do App</Navbar.Brand>
 														<Navbar.Toggle />
-														<Navbar className="justify-content-end">
-															<Navbar.Text>
-																<Link onClick={logout}>Sign Out</Link>
-															</Navbar.Text>
-														</Navbar>
+														<Navbar.Collapse className="justify-content-center">
+															<Nav className="mx-auto mt-4 mt-sm-0">
+																<Form.Control className="text-center text-sm-start" type="date" onChange={(e) => setDate(e.target.value)} value={date} placeholder="name@example.com" />
+															</Nav>
+															<Navbar className="justify-content-center justify-content-sm-center">
+																<Navbar.Text>
+																	<Link
+																		onClick={() => {
+																			setShowLoading(true)
+																			logout()
+																		}}
+																	>
+																		Sign Out
+																	</Link>
+																</Navbar.Text>
+															</Navbar>
+														</Navbar.Collapse>
 													</Container>
 												</Navbar>
 
 												{todos.important && Object.keys(todos.important).length ? (
-													<ListGroup className="shadow">
+													<ListGroup>
 														{Object.keys(todos.important).map((key) => {
 															const { [key]: currentImportant } = todos.important
 															return (
-																<ListGroup.Item className="bg-transparent text-white" key={key}>
+																<ListGroup.Item className="bg-transparent text-white mx-3 shadow" key={key}>
 																	<Row>
-																		<Col sm={8}>{currentImportant.title}</Col>
-																		<Col sm={4} className="text-end">
+																		<Col sm={8} className="text-center text-sm-start">
+																			{currentImportant.title}
+																		</Col>
+																		<Col sm={4} className="text-center text-sm-end">
 																			<FontAwesomeIcon
 																				onClick={() => {
 																					addItem(currentImportant._id)
@@ -470,10 +482,12 @@ const ToDo = () => {
 																						{Object.keys(todos[getDate(currentImportant.date) + "_children"][key]).map((childKey) => {
 																							const { [childKey]: currentImportantChild } = todos[getDate(currentImportant.date) + "_children"][key]
 																							return (
-																								<ListGroup.Item key={childKey} className="bg-transparent text-white border-success">
+																								<ListGroup.Item key={childKey} className="bg-transparent text-white">
 																									<Row>
-																										<Col sm={9}>{currentImportantChild.title}</Col>
-																										<Col sm={3} className="text-end">
+																										<Col sm={9} className="text-center text-sm-start">
+																											{currentImportantChild.title}
+																										</Col>
+																										<Col sm={3} className="text-center text-sm-end">
 																											<FontAwesomeIcon
 																												onClick={
 																													!currentImportantChild.statusLoading
@@ -594,10 +608,12 @@ const ToDo = () => {
 														{Object.keys(todos[date]).map((key) => {
 															const { [key]: currentTodo } = todos[date]
 															return (
-																<ListGroup.Item className="bg-transparent text-white" key={key}>
+																<ListGroup.Item className="bg-transparent text-white mx-3" key={key}>
 																	<Row>
-																		<Col sm={8}>{currentTodo.title}</Col>
-																		<Col sm={4} className="text-end">
+																		<Col sm={8} className="text-center text-sm-start">
+																			{currentTodo.title}
+																		</Col>
+																		<Col sm={4} className="text-center text-sm-end">
 																			<FontAwesomeIcon
 																				onClick={() => {
 																					addItem(currentTodo._id)
@@ -761,10 +777,12 @@ const ToDo = () => {
 																						{Object.keys(todos[getDate(currentTodo.date) + "_children"][key]).map((childKey) => {
 																							const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
 																							return (
-																								<ListGroup.Item key={childKey} className="bg-transparent text-white border-success">
+																								<ListGroup.Item key={childKey} className="bg-transparent text-white">
 																									<Row>
-																										<Col sm={9}>{currentChild.title}</Col>
-																										<Col sm={3} className="text-end">
+																										<Col sm={9} className="text-center text-sm-start">
+																											{currentChild.title}
+																										</Col>
+																										<Col sm={3} className="text-center text-sm-end">
 																											<FontAwesomeIcon
 																												onClick={
 																													!currentChild.statusLoading

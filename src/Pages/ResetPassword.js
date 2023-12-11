@@ -7,12 +7,7 @@ import { useMain } from "../Components/useMain"
 import { useEffect } from "react"
 
 const ResetPassword = () => {
-	const {
-		setDisplayLocation,
-		transitionStages,
-		setTransitionStages,
-		location,
-	} = useMain()
+	const { setDisplayLocation, transitionStages, setTransitionStages, location } = useMain()
 	const { formData, setFormData, formRef, handleFormData, login } = useAuth()
 	const SignIn = (e) => {
 		e.preventDefault()
@@ -23,27 +18,14 @@ const ResetPassword = () => {
 			passwordFeedback: "",
 		}
 
-		if (
-			formData.username &&
-			formData.password &&
-			formData.username.length &&
-			formData.password.length
-		) {
+		if (formData.username && formData.password && formData.username.length && formData.password.length) {
 			setTransitionStages({
 				...transitionStages,
 				submitText: <FontAwesomeIcon icon={faSpinner} spin />,
 			})
 			login(formData)
 		} else {
-			!formData.username || !formData.username.length ? (
-				formRef.current.username.focus()
-			) : !formData.password || !formData.password.length ? (
-				formRef.current.password.focus()
-			) : !formData.repeatPassword || !formData.repeatPassword.length ? (
-				formRef.current.repeatPassword.focus()
-			) : (
-				<></>
-			)
+			!formData.username || !formData.username.length ? formRef.current.username.focus() : !formData.password || !formData.password.length ? formRef.current.password.focus() : !formData.repeatPassword || !formData.repeatPassword.length ? formRef.current.repeatPassword.focus() : <></>
 			!formData.username || !formData.username.length
 				? (validations = {
 						...validations,
@@ -84,15 +66,10 @@ const ResetPassword = () => {
 	}, [])
 
 	return (
-		<div
-			className={`login bg-dark bg-gradient text-white min-vh-100 d-flex align-items-center px-5`}
-		>
+		<div className={`login bg-dark bg-gradient text-white min-vh-100 d-flex align-items-center px-0 px-md-5`}>
 			<Container fluid>
 				<Row className="mx-auto">
-					<Col
-						sm={8}
-						className="border rounded rounded-5 overflow-hidden shadow shadow-lg mx-auto"
-					>
+					<Col sm={12} className="border rounded rounded-5 overflow-hidden shadow shadow-lg mx-auto">
 						<Row className="fadeOut">
 							<Col
 								sm={12}
@@ -109,82 +86,21 @@ const ResetPassword = () => {
 							>
 								<Form onSubmit={SignIn} className={`px-5`}>
 									<InputGroup className="my-3" hasValidation>
-										<InputGroup.Text
-											className={`bg-transparent text-white ${
-												formData.usernameValidation
-													? "border-success"
-													: formData.usernameValidation ===
-													  false
-													? "border-danger"
-													: ""
-											}`}
-										>
-											<FontAwesomeIcon
-												className={`${
-													formData.usernameValidation
-														? "text-success"
-														: formData.usernameValidation ===
-														  false
-														? "text-danger"
-														: ""
-												}`}
-												icon={faUserAlt}
-											/>
+										<InputGroup.Text className={`bg-transparent text-white ${formData.usernameValidation ? "border-success" : formData.usernameValidation === false ? "border-danger" : ""}`}>
+											<FontAwesomeIcon className={`${formData.usernameValidation ? "text-success" : formData.usernameValidation === false ? "text-danger" : ""}`} icon={faUserAlt} />
 										</InputGroup.Text>
-										<Form.Control
-											className="bg-transparent text-white"
-											type="text"
-											placeholder="Email"
-											name="username"
-											onChange={handleFormData}
-											ref={(ref) =>
-												(formRef.current.username = ref)
-											}
-											value={
-												formData.username
-													? formData.username
-													: ""
-											}
-											isInvalid={
-												formData.usernameValidation ===
-												false
-											}
-											isValid={
-												formData.usernameValidation
-											}
-										/>
-										<Form.Control.Feedback
-											className="fadeOut"
-											type={
-												formData.usernameValidation
-													? "valid"
-													: "invalid"
-											}
-										>
+										<Form.Control className="bg-transparent text-white" type="text" placeholder="Email" name="username" onChange={handleFormData} ref={(ref) => (formRef.current.username = ref)} value={formData.username ? formData.username : ""} isInvalid={formData.usernameValidation === false} isValid={formData.usernameValidation} />
+										<Form.Control.Feedback className="fadeOut" type={formData.usernameValidation ? "valid" : "invalid"}>
 											{formData.usernameFeedback}
 										</Form.Control.Feedback>
 									</InputGroup>
-									<Button
-										className="bg-gradient d-block mb-3 mx-auto"
-										variant="success"
-										type="submit"
-									>
+									<Button className="bg-gradient d-block mb-3 mx-auto" variant="success" type="submit">
 										Reset Password
 									</Button>
-									<Button
-										as={Link}
-										to="/sign-up"
-										className="bg-gradient d-block mb-3 mx-auto"
-										variant="primary"
-									>
+									<Button as={Link} to="/sign-up" className="bg-gradient d-block mb-3 mx-auto" variant="primary">
 										Go to Sign Up
 									</Button>
-									<Button
-										as={Link}
-										to="/sign-in"
-										className="bg-gradient d-block mb-3 mx-auto"
-										variant="primary"
-									>
+									<Button as={Link} to="/sign-in" className="bg-gradient d-block mb-3 mx-auto" variant="primary">
 										Go to Sign In
 									</Button>
 								</Form>
