@@ -19,7 +19,7 @@ server.once("close", function () {
 	const connectDB = require("./configs/db")
 	const app = express()
 	const cookieParser = require("cookie-parser")
-	const origins = ["https://todoapp-kjrd.onrender.com/"]
+	const origins = ["https://todoapp-kjrd.onrender.com"]
 
 	connectDB()
 
