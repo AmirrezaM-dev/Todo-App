@@ -1,0 +1,25 @@
+{
+	"name": "fit-app",
+	"version": "0.0.1",
+	"description": "Fit App",
+	"main": "./server.js",
+	"homepage": "./",
+	"scripts": {
+		"start": "nodemon server.js"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.20"
+	},
+	"dependencies": {
+		"axios": "^1.2.0",
+		"bcryptjs": "^2.4.3",
+		"cookie-parser": "^1.4.6",
+		"cors": "^2.8.5",
+		"csrf": "^3.1.0",
+		"express": "^4.18.2",
+		"express-async-handler": "^1.2.0",
+		"jsonwebtoken": "^8.5.1",
+		"mongoose": "^6.7.2",
+		"uuidv4": "^6.2.13"
+	}
+}
