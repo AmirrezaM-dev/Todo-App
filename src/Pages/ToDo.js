@@ -70,32 +70,38 @@ const ToDo = () => {
 				sendData = typeof parent_id === "string" ? { ...sendData, parent_id } : sendData
 				authApi.post("/api/todo/create", sendData).then((response) => {
 					if (typeof parent_id === "string")
-						setTodos({
-							...todos,
-							[date + "_children"]: {
-								...todos[date + "_children"],
-								[parent_id]: {
-									...todos[date + "_children"][parent_id],
-									[response.data.newTodo._id]: response.data.newTodo,
+						setTodos((todos) => {
+							return {
+								...todos,
+								[date + "_children"]: {
+									...todos[date + "_children"],
+									[parent_id]: {
+										...todos[date + "_children"][parent_id],
+										[response.data.newTodo._id]: response.data.newTodo,
+									},
 								},
-							},
+							}
 						})
 					else {
 						if (isImportant)
-							setTodos({
-								...todos,
-								important: {
-									...todos.important,
-									[response.data.newTodo._id]: response.data.newTodo,
-								},
+							setTodos((todos) => {
+								return {
+									...todos,
+									important: {
+										...todos.important,
+										[response.data.newTodo._id]: response.data.newTodo,
+									},
+								}
 							})
 						else
-							setTodos({
-								...todos,
-								[date]: {
-									...todos[date],
-									[response.data.newTodo._id]: response.data.newTodo,
-								},
+							setTodos((todos) => {
+								return {
+									...todos,
+									[date]: {
+										...todos[date],
+										[response.data.newTodo._id]: response.data.newTodo,
+									},
+								}
 							})
 					}
 					Swal.fire({
@@ -153,44 +159,52 @@ const ToDo = () => {
 				sendData = typeof todo.parent === "string" ? { ...sendData, parent_id: todo.parent } : sendData
 				authApi.post("/api/todo/edit", sendData).then(() => {
 					if (todo.parent)
-						setTodos({
-							...todos,
-							[getDate(todo.date) + "_children"]: {
-								...todos[getDate(todo.date) + "_children"],
-								[todo.parent]: {
-									...todos[getDate(todo.date) + "_children"][todo.parent],
-									[todo._id]: { ...todo, ...sendData },
+						setTodos((todos) => {
+							return {
+								...todos,
+								[getDate(todo.date) + "_children"]: {
+									...todos[getDate(todo.date) + "_children"],
+									[todo.parent]: {
+										...todos[getDate(todo.date) + "_children"][todo.parent],
+										[todo._id]: { ...todo, ...sendData },
+									},
 								},
-							},
+							}
 						})
 					else {
 						if (wasImportant && isImportant)
-							setTodos({
-								...todos,
-								important: {
-									...todos.important,
-									[todo._id]: { ...todo, ...sendData },
-								},
+							setTodos((todos) => {
+								return {
+									...todos,
+									important: {
+										...todos.important,
+										[todo._id]: { ...todo, ...sendData },
+									},
+								}
 							})
 						else if (wasImportant && !isImportant) {
 							const { [todo._id]: currentImportant, ...important } = todos.important
-							setTodos({
-								...todos,
-								important,
-								[getDate(currentImportant.date)]: {
-									...todos[getDate(currentImportant.date)],
-									[currentImportant._id]: { ...currentImportant, ...sendData },
-								},
+							setTodos((todos) => {
+								return {
+									...todos,
+									important,
+									[getDate(currentImportant.date)]: {
+										...todos[getDate(currentImportant.date)],
+										[currentImportant._id]: { ...currentImportant, ...sendData },
+									},
+								}
 							})
 						} else if (!wasImportant && isImportant) {
 							const { [todo._id]: currentTodo, ...restTodos } = todos[getDate(todo.date)]
-							setTodos({
-								...todos,
-								important: {
-									...todos.important,
-									[currentTodo._id]: { ...currentTodo, ...sendData },
-								},
-								[getDate(todo.date)]: restTodos,
+							setTodos((todos) => {
+								return {
+									...todos,
+									important: {
+										...todos.important,
+										[currentTodo._id]: { ...currentTodo, ...sendData },
+									},
+									[getDate(todo.date)]: restTodos,
+								}
 							})
 						}
 					}
@@ -231,27 +245,30 @@ const ToDo = () => {
 										[importantTodo._id]: importantTodo,
 									})
 							)
-							setTodos({
-								...todos,
-								important: importantTodos,
-								[date]: newTodos,
-								[date + "_children"]: childrenTodos,
+							setTodos((todos) => {
+								return {
+									...todos,
+									important: importantTodos,
+									[date]: newTodos,
+									[date + "_children"]: childrenTodos,
+								}
 							})
 						})
 						.finally(() => setShowLoading(false))
 				} else {
 					setShowLoading(false)
-					setTodos({
-						...todos,
-						[date]: newTodos,
-						[date + "_children"]: childrenTodos,
+					setTodos((todos) => {
+						return {
+							...todos,
+							[date]: newTodos,
+							[date + "_children"]: childrenTodos,
+						}
 					})
 				}
 			})
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [date])
-
 	return (
 		<Routes>
 			<Route
@@ -296,7 +313,7 @@ const ToDo = () => {
 												{todos.important && Object.keys(todos.important).length ? (
 													<ListGroup className="shadow">
 														{Object.keys(todos.important).map((key) => {
-															const { [key]: currentImportant, ...restImportant } = todos.important
+															const { [key]: currentImportant } = todos.important
 															return (
 																<ListGroup.Item className="bg-transparent text-white" key={key}>
 																	<Row>
@@ -313,9 +330,12 @@ const ToDo = () => {
 																				onClick={
 																					!currentImportant.importantLoading
 																						? () => {
-																								setTodos({
-																									...todos,
-																									important: { ...todos.important, [currentImportant._id]: { ...currentImportant, importantLoading: true } },
+																								setTodos((todos) => {
+																									const { [key]: currentImportant } = todos.important
+																									return {
+																										...todos,
+																										important: { ...todos.important, [currentImportant._id]: { ...currentImportant, importantLoading: true } },
+																									}
 																								})
 																								authApi
 																									.post("/api/todo/important", {
@@ -324,17 +344,23 @@ const ToDo = () => {
 																									})
 																									.then(() => {
 																										todos[getDate(currentImportant.date)]
-																											? setTodos({
-																													...todos,
-																													important: restImportant,
-																													[getDate(currentImportant.date)]: {
-																														...todos[getDate(currentImportant.date)],
-																														[currentImportant._id]: currentImportant,
-																													},
+																											? setTodos((todos) => {
+																													const { [key]: currentImportant, ...restImportant } = todos.important
+																													return {
+																														...todos,
+																														important: restImportant,
+																														[getDate(currentImportant.date)]: {
+																															...todos[getDate(currentImportant.date)],
+																															[currentImportant._id]: { ...currentImportant, importantLoading: false },
+																														},
+																													}
 																											  })
-																											: setTodos({
-																													...todos,
-																													important: restImportant,
+																											: setTodos((todos) => {
+																													const { [key]: currentImportant, ...restImportant } = todos.important
+																													return {
+																														...todos,
+																														important: restImportant,
+																													}
 																											  })
 																									})
 																						  }
@@ -348,9 +374,9 @@ const ToDo = () => {
 																				onClick={
 																					!currentImportant.statusLoading
 																						? () => {
-																								setTodos({
-																									...todos,
-																									important: { ...todos.important, [currentImportant._id]: { ...currentImportant, statusLoading: true } },
+																								setTodos((todos) => {
+																									const { [key]: currentImportant } = todos.important
+																									return { ...todos, important: { ...todos.important, [currentImportant._id]: { ...currentImportant, statusLoading: true } } }
 																								})
 																								authApi
 																									.post("/api/todo/status", {
@@ -358,15 +384,19 @@ const ToDo = () => {
 																										to: currentImportant.status === "true" ? false : true,
 																									})
 																									.then(() => {
-																										setTodos({
-																											...todos,
-																											important: {
-																												...todos.important,
-																												[key]: {
-																													...currentImportant,
-																													status: currentImportant.status === "true" ? "false" : "true",
+																										setTodos((todos) => {
+																											const { [key]: currentImportant } = todos.important
+																											return {
+																												...todos,
+																												important: {
+																													...todos.important,
+																													[key]: {
+																														...currentImportant,
+																														status: currentImportant.status === "true" ? "false" : "true",
+																														statusLoading: false,
+																													},
 																												},
-																											},
+																											}
 																										})
 																									})
 																						  }
@@ -379,15 +409,18 @@ const ToDo = () => {
 																			{todos[getDate(currentImportant.date) + "_children"] && todos[getDate(currentImportant.date) + "_children"][key] && Object.keys(todos[getDate(currentImportant.date) + "_children"][key]).length ? (
 																				<FontAwesomeIcon
 																					onClick={() => {
-																						setTodos({
-																							...todos,
-																							important: {
-																								...todos.important,
-																								[key]: {
-																									...currentImportant,
-																									isCollapsed: !currentImportant.isCollapsed,
+																						setTodos((todos) => {
+																							const { [key]: currentImportant } = todos.important
+																							return {
+																								...todos,
+																								important: {
+																									...todos.important,
+																									[key]: {
+																										...currentImportant,
+																										isCollapsed: !currentImportant.isCollapsed,
+																									},
 																								},
-																							},
+																							}
 																						})
 																					}}
 																					icon={currentImportant.isCollapsed ? faEyeSlash : faEye}
@@ -401,18 +434,24 @@ const ToDo = () => {
 																				onClick={
 																					!currentImportant.removeLoading
 																						? () => {
-																								setTodos({
-																									...todos,
-																									important: { ...todos.important, [currentImportant._id]: { ...currentImportant, removeLoading: true } },
+																								setTodos((todos) => {
+																									const { [key]: currentImportant } = todos.important
+																									return {
+																										...todos,
+																										important: { ...todos.important, [currentImportant._id]: { ...currentImportant, removeLoading: true } },
+																									}
 																								})
 																								authApi
 																									.post("/api/todo/remove", {
 																										_id: key,
 																									})
 																									.then(() => {
-																										setTodos({
-																											...todos,
-																											important: restImportant,
+																										setTodos((todos) => {
+																											const { [key]: currentImportant, ...restImportant } = todos.important
+																											return {
+																												...todos,
+																												important: restImportant,
+																											}
 																										})
 																									})
 																						  }
@@ -429,7 +468,7 @@ const ToDo = () => {
 																				{todos[getDate(currentImportant.date) + "_children"] && todos[getDate(currentImportant.date) + "_children"][key] ? (
 																					<ListGroup>
 																						{Object.keys(todos[getDate(currentImportant.date) + "_children"][key]).map((childKey) => {
-																							const { [childKey]: currentImportantChild, ...restChildren } = todos[getDate(currentImportant.date) + "_children"][key]
+																							const { [childKey]: currentImportantChild } = todos[getDate(currentImportant.date) + "_children"][key]
 																							return (
 																								<ListGroup.Item key={childKey} className="bg-transparent text-white border-success">
 																									<Row>
@@ -439,18 +478,21 @@ const ToDo = () => {
 																												onClick={
 																													!currentImportantChild.statusLoading
 																														? () => {
-																																setTodos({
-																																	...todos,
-																																	[getDate(currentImportant.date) + "_children"]: {
-																																		...todos[getDate(currentImportant.date) + "_children"],
-																																		[key]: {
-																																			...todos[getDate(currentImportant.date) + "_children"][key],
-																																			[childKey]: {
-																																				...todos[getDate(currentImportant.date) + "_children"][key][childKey],
-																																				statusLoading: true,
+																																setTodos((todos) => {
+																																	const { [key]: currentImportant } = todos.important
+																																	return {
+																																		...todos,
+																																		[getDate(currentImportant.date) + "_children"]: {
+																																			...todos[getDate(currentImportant.date) + "_children"],
+																																			[key]: {
+																																				...todos[getDate(currentImportant.date) + "_children"][key],
+																																				[childKey]: {
+																																					...todos[getDate(currentImportant.date) + "_children"][key][childKey],
+																																					statusLoading: true,
+																																				},
 																																			},
 																																		},
-																																	},
+																																	}
 																																})
 																																authApi
 																																	.post("/api/todo/status", {
@@ -458,18 +500,22 @@ const ToDo = () => {
 																																		to: todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? false : true,
 																																	})
 																																	.then(() => {
-																																		setTodos({
-																																			...todos,
-																																			[getDate(currentImportant.date) + "_children"]: {
-																																				...todos[getDate(currentImportant.date) + "_children"],
-																																				[key]: {
-																																					...todos[getDate(currentImportant.date) + "_children"][key],
-																																					[childKey]: {
-																																						...todos[getDate(currentImportant.date) + "_children"][key][childKey],
-																																						status: todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
+																																		setTodos((todos) => {
+																																			const { [key]: currentImportant } = todos.important
+																																			return {
+																																				...todos,
+																																				[getDate(currentImportant.date) + "_children"]: {
+																																					...todos[getDate(currentImportant.date) + "_children"],
+																																					[key]: {
+																																						...todos[getDate(currentImportant.date) + "_children"][key],
+																																						[childKey]: {
+																																							...todos[getDate(currentImportant.date) + "_children"][key][childKey],
+																																							status: todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
+																																							statusLoading: false,
+																																						},
 																																					},
 																																				},
-																																			},
+																																			}
 																																		})
 																																	})
 																														  }
@@ -484,30 +530,36 @@ const ToDo = () => {
 																												onClick={
 																													!currentImportantChild.removeLoading
 																														? () => {
-																																setTodos({
-																																	...todos,
-																																	[getDate(currentImportant.date) + "_children"]: {
-																																		...todos[getDate(currentImportant.date) + "_children"],
-																																		[key]: {
-																																			...todos[getDate(currentImportant.date) + "_children"][key],
-																																			[childKey]: {
-																																				...todos[getDate(currentImportant.date) + "_children"][key][childKey],
-																																				removeLoading: true,
+																																setTodos((todos) => {
+																																	const { [key]: currentImportant } = todos.important
+																																	return {
+																																		...todos,
+																																		[getDate(currentImportant.date) + "_children"]: {
+																																			...todos[getDate(currentImportant.date) + "_children"],
+																																			[key]: {
+																																				...todos[getDate(currentImportant.date) + "_children"][key],
+																																				[childKey]: {
+																																					...todos[getDate(currentImportant.date) + "_children"][key][childKey],
+																																					removeLoading: true,
+																																				},
 																																			},
 																																		},
-																																	},
+																																	}
 																																})
 																																authApi
 																																	.post("/api/todo/remove", {
 																																		_id: childKey,
 																																	})
 																																	.then(() => {
-																																		setTodos({
-																																			...todos,
-																																			[getDate(currentImportant.date) + "_children"]: {
-																																				...todos[getDate(currentImportant.date) + "_children"],
-																																				[key]: restChildren,
-																																			},
+																																		setTodos((todos) => {
+																																			const { [childKey]: currentImportantChild, ...restChildren } = todos[getDate(currentImportant.date) + "_children"][key]
+																																			return {
+																																				...todos,
+																																				[getDate(currentImportant.date) + "_children"]: {
+																																					...todos[getDate(currentImportant.date) + "_children"],
+																																					[key]: restChildren,
+																																				},
+																																			}
 																																		})
 																																	})
 																														  }
@@ -540,7 +592,7 @@ const ToDo = () => {
 												{todos[date] && Object.keys(todos[date]).length ? (
 													<ListGroup>
 														{Object.keys(todos[date]).map((key) => {
-															const { [key]: currentTodo, ...restTodos } = todos[date]
+															const { [key]: currentTodo } = todos[date]
 															return (
 																<ListGroup.Item className="bg-transparent text-white" key={key}>
 																	<Row>
@@ -557,12 +609,15 @@ const ToDo = () => {
 																				onClick={
 																					!currentTodo.importantLoading
 																						? () => {
-																								setTodos({
-																									...todos,
-																									[date]: {
-																										...todos[date],
-																										[currentTodo._id]: { ...currentTodo, importantLoading: true },
-																									},
+																								setTodos((todos) => {
+																									const { [key]: currentTodo } = todos[date]
+																									return {
+																										...todos,
+																										[date]: {
+																											...todos[date],
+																											[currentTodo._id]: { ...currentTodo, importantLoading: true },
+																										},
+																									}
 																								})
 																								authApi
 																									.post("/api/todo/important", {
@@ -570,13 +625,16 @@ const ToDo = () => {
 																										to: true,
 																									})
 																									.then(() => {
-																										setTodos({
-																											...todos,
-																											[date]: restTodos,
-																											important: {
-																												...todos.important,
-																												[key]: currentTodo,
-																											},
+																										setTodos((todos) => {
+																											const { [key]: currentTodo, ...restTodos } = todos[date]
+																											return {
+																												...todos,
+																												[date]: restTodos,
+																												important: {
+																													...todos.important,
+																													[key]: { ...currentTodo, importantLoading: false },
+																												},
+																											}
 																										})
 																									})
 																						  }
@@ -590,15 +648,18 @@ const ToDo = () => {
 																				onClick={
 																					!currentTodo.statusLoading
 																						? () => {
-																								setTodos({
-																									...todos,
-																									[date]: {
-																										...todos[date],
-																										[key]: {
-																											...currentTodo,
-																											statusLoading: true,
+																								setTodos((todos) => {
+																									const { [key]: currentTodo } = todos[date]
+																									return {
+																										...todos,
+																										[date]: {
+																											...todos[date],
+																											[key]: {
+																												...currentTodo,
+																												statusLoading: true,
+																											},
 																										},
-																									},
+																									}
 																								})
 																								authApi
 																									.post("/api/todo/status", {
@@ -606,15 +667,19 @@ const ToDo = () => {
 																										to: currentTodo.status === "true" ? false : true,
 																									})
 																									.then(() => {
-																										setTodos({
-																											...todos,
-																											[date]: {
-																												...todos[date],
-																												[key]: {
-																													...currentTodo,
-																													status: currentTodo.status === "true" ? "false" : "true",
+																										setTodos((todos) => {
+																											const { [key]: currentTodo } = todos[date]
+																											return {
+																												...todos,
+																												[date]: {
+																													...todos[date],
+																													[key]: {
+																														...currentTodo,
+																														status: currentTodo.status === "true" ? "false" : "true",
+																														statusLoading: false,
+																													},
 																												},
-																											},
+																											}
 																										})
 																									})
 																						  }
@@ -627,15 +692,18 @@ const ToDo = () => {
 																			{todos[getDate(currentTodo.date) + "_children"] && todos[getDate(currentTodo.date) + "_children"][key] && Object.keys(todos[getDate(currentTodo.date) + "_children"][key]).length ? (
 																				<FontAwesomeIcon
 																					onClick={() => {
-																						setTodos({
-																							...todos,
-																							[date]: {
-																								...todos[date],
-																								[key]: {
-																									...currentTodo,
-																									isCollapsed: !currentTodo.isCollapsed,
+																						setTodos((todos) => {
+																							const { [key]: currentTodo } = todos[date]
+																							return {
+																								...todos,
+																								[date]: {
+																									...todos[date],
+																									[key]: {
+																										...currentTodo,
+																										isCollapsed: !currentTodo.isCollapsed,
+																									},
 																								},
-																							},
+																							}
 																						})
 																					}}
 																					icon={currentTodo.isCollapsed ? faEyeSlash : faEye}
@@ -649,26 +717,32 @@ const ToDo = () => {
 																				onClick={
 																					!currentTodo.removeLoading
 																						? () => {
-																								setTodos({
-																									...todos,
-																									[date]: {
-																										...todos[date],
-																										[key]: {
-																											...currentTodo,
-																											removeLoading: true,
+																								setTodos((todos) => {
+																									const { [key]: currentTodo } = todos[date]
+																									return {
+																										...todos,
+																										[date]: {
+																											...todos[date],
+																											[key]: {
+																												...currentTodo,
+																												removeLoading: true,
+																											},
 																										},
-																									},
+																									}
 																								})
 																								authApi
 																									.post("/api/todo/remove", {
 																										_id: key,
 																									})
 																									.then(() => {
-																										setTodos({
-																											...todos,
-																											[date]: {
-																												...restTodos,
-																											},
+																										setTodos((todos) => {
+																											const { [key]: currentTodo, ...restTodos } = todos[date]
+																											return {
+																												...todos,
+																												[date]: {
+																													...restTodos,
+																												},
+																											}
 																										})
 																									})
 																						  }
@@ -685,7 +759,7 @@ const ToDo = () => {
 																				{todos[getDate(currentTodo.date) + "_children"] && todos[getDate(currentTodo.date) + "_children"][key] ? (
 																					<ListGroup>
 																						{Object.keys(todos[getDate(currentTodo.date) + "_children"][key]).map((childKey) => {
-																							const { [childKey]: currentChild, ...restChildren } = todos[getDate(currentTodo.date) + "_children"][key]
+																							const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
 																							return (
 																								<ListGroup.Item key={childKey} className="bg-transparent text-white border-success">
 																									<Row>
@@ -695,18 +769,21 @@ const ToDo = () => {
 																												onClick={
 																													!currentChild.statusLoading
 																														? () => {
-																																setTodos({
-																																	...todos,
-																																	[getDate(currentTodo.date) + "_children"]: {
-																																		...todos[getDate(currentTodo.date) + "_children"],
-																																		[key]: {
-																																			...todos[getDate(currentTodo.date) + "_children"][key],
-																																			[childKey]: {
-																																				...currentChild,
-																																				statusLoading: true,
+																																setTodos((todos) => {
+																																	const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
+																																	return {
+																																		...todos,
+																																		[getDate(currentTodo.date) + "_children"]: {
+																																			...todos[getDate(currentTodo.date) + "_children"],
+																																			[key]: {
+																																				...todos[getDate(currentTodo.date) + "_children"][key],
+																																				[childKey]: {
+																																					...currentChild,
+																																					statusLoading: true,
+																																				},
 																																			},
 																																		},
-																																	},
+																																	}
 																																})
 																																authApi
 																																	.post("/api/todo/status", {
@@ -714,18 +791,22 @@ const ToDo = () => {
 																																		to: currentChild.status === "true" ? false : true,
 																																	})
 																																	.then(() => {
-																																		setTodos({
-																																			...todos,
-																																			[getDate(currentTodo.date) + "_children"]: {
-																																				...todos[getDate(currentTodo.date) + "_children"],
-																																				[key]: {
-																																					...todos[getDate(currentTodo.date) + "_children"][key],
-																																					[childKey]: {
-																																						...currentChild,
-																																						status: currentChild.status === "true" ? "false" : "true",
+																																		setTodos((todos) => {
+																																			const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
+																																			return {
+																																				...todos,
+																																				[getDate(currentTodo.date) + "_children"]: {
+																																					...todos[getDate(currentTodo.date) + "_children"],
+																																					[key]: {
+																																						...todos[getDate(currentTodo.date) + "_children"][key],
+																																						[childKey]: {
+																																							...currentChild,
+																																							status: currentChild.status === "true" ? "false" : "true",
+																																							statusLoading: false,
+																																						},
 																																					},
 																																				},
-																																			},
+																																			}
 																																		})
 																																	})
 																														  }
@@ -740,30 +821,36 @@ const ToDo = () => {
 																												onClick={
 																													!currentChild.removeLoading
 																														? () => {
-																																setTodos({
-																																	...todos,
-																																	[getDate(currentTodo.date) + "_children"]: {
-																																		...todos[getDate(currentTodo.date) + "_children"],
-																																		[key]: {
-																																			...todos[getDate(currentTodo.date) + "_children"][key],
-																																			[childKey]: {
-																																				...currentChild,
-																																				removeLoading: true,
+																																setTodos((todos) => {
+																																	const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
+																																	return {
+																																		...todos,
+																																		[getDate(currentTodo.date) + "_children"]: {
+																																			...todos[getDate(currentTodo.date) + "_children"],
+																																			[key]: {
+																																				...todos[getDate(currentTodo.date) + "_children"][key],
+																																				[childKey]: {
+																																					...currentChild,
+																																					removeLoading: true,
+																																				},
 																																			},
 																																		},
-																																	},
+																																	}
 																																})
 																																authApi
 																																	.post("/api/todo/remove", {
 																																		_id: childKey,
 																																	})
 																																	.then(() => {
-																																		setTodos({
-																																			...todos,
-																																			[getDate(currentTodo.date) + "_children"]: {
-																																				...todos[getDate(currentTodo.date) + "_children"],
-																																				[key]: restChildren,
-																																			},
+																																		setTodos((todos) => {
+																																			const { [childKey]: currentChild, ...restChildren } = todos[getDate(currentTodo.date) + "_children"][key]
+																																			return {
+																																				...todos,
+																																				[getDate(currentTodo.date) + "_children"]: {
+																																					...todos[getDate(currentTodo.date) + "_children"],
+																																					[key]: restChildren,
+																																				},
+																																			}
 																																		})
 																																	})
 																														  }
