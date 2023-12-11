@@ -1,10 +1,9 @@
 .cursor-pointer {
 	cursor: pointer;
 }
-.login input::placeholder {
-	color: #fff;
-}
-input.bg-dark::placeholder {
+.login input::placeholder,
+input.bg-dark::placeholder,
+textarea.bg-dark::placeholder {
 	color: #fff;
 }
 .slideRight {
