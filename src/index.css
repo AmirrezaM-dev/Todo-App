@@ -4,6 +4,9 @@
 .login input::placeholder {
 	color: #fff;
 }
+input.bg-dark::placeholder {
+	color: #fff;
+}
 .slideRight {
 	transition: all 0.5s;
 	animation: 0.5s slideRight forwards;

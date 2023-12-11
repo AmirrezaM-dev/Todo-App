@@ -26,8 +26,8 @@ const ToDo = () => {
 	const addItem = (parent_id) => {
 		Swal.fire({
 			html: `
-				<input id="swal-title" type="text" class="text-center form-control my-2" placeholder="Title">
-				<textarea id="swal-details" class="text-center form-control my-2" placeholder="Details"></textarea>
+				<input id="swal-title" type="text" class="text-center form-control my-2 bg-dark text-white" placeholder="Title">
+				<textarea id="swal-details" class="text-center form-control my-2 bg-dark text-white" placeholder="Details"></textarea>
 				<br/>
 				${typeof parent_id !== "string" ? `<label>Is important?</label><input id="swal-isImportant" class="swal2-checkbox mx-2" type="checkbox" />` : ""}
 			`,
@@ -115,8 +115,8 @@ const ToDo = () => {
 	const editItem = (todo, wasImportant) => {
 		Swal.fire({
 			html: `
-				<input id="swal-title" type="text" class="text-center form-control my-2" placeholder="Title" value="${todo.title}">
-				<textarea id="swal-details" class="text-center form-control my-2" placeholder="Details">${todo.details}</textarea>
+				<input id="swal-title" type="text" class="text-center form-control my-2 bg-dark text-white" placeholder="Title" value="${todo.title}">
+				<textarea id="swal-details" class="text-center form-control my-2 bg-dark text-white" placeholder="Details">${todo.details}</textarea>
 				<br/>
 				${typeof todo.parent !== "string" ? `<label>Is important?</label><input id="swal-isImportant" class="swal2-checkbox mx-2" type="checkbox" ${wasImportant ? "checked" : ""} />` : ""}
 			`,
