@@ -13,13 +13,15 @@ server.once("listening", function () {
 server.listen(port)
 server.once("close", function () {
 	const express = require("express")
-	const router = express.Router()
+	require("dotenv").config({ path: ".env" })
+	express.Router()
 	const cors = require("cors")
 	const { errorHandler } = require("./middlewares/errorMiddleware")
 	const connectDB = require("./configs/db")
 	const app = express()
 	const cookieParser = require("cookie-parser")
-	const origins = ["https://todoapp-kjrd.onrender.com"]
+	const origins = [process.env.FRONT_END_URL]
+	console.log(process.env.FRONT_END_URL)
 
 	connectDB()
 

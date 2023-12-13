@@ -23,6 +23,21 @@ const ToDo = () => {
 
 	const { authApi, logout } = useAuth()
 	const { setDisplayLocation, transitionStages, setTransitionStages, location } = useMain()
+	const searchItem = (o, p) => {
+		let r
+		Object.keys(o).some(function (k) {
+			if (k === p) {
+				r = o[k]
+				return true
+			}
+			if (typeof o[k] === "object") {
+				r = searchItem(o[k], p)
+				return !!r
+			}
+			return false
+		})
+		return r
+	}
 	const addItem = (parent_id) => {
 		Swal.fire({
 			html: `
@@ -398,16 +413,33 @@ const ToDo = () => {
 																									.then(() => {
 																										setTodos((todos) => {
 																											const { [key]: currentImportant } = todos.important
-																											return {
-																												...todos,
-																												important: {
-																													...todos.important,
-																													[key]: {
-																														...currentImportant,
-																														status: currentImportant.status === "true" ? "false" : "true",
-																														statusLoading: false,
+																											if (currentImportant)
+																												return {
+																													...todos,
+																													important: {
+																														...todos.important,
+																														[key]: {
+																															...currentImportant,
+																															status: currentImportant.status === "true" ? "false" : "true",
+																															statusLoading: false,
+																														},
 																													},
-																												},
+																												}
+																											else {
+																												const currentTodo = searchItem(todos, key)
+																												if (currentTodo)
+																													return {
+																														...todos,
+																														[getDate(currentTodo.date)]: {
+																															...todos[getDate(currentTodo.date)],
+																															[currentTodo._id]: {
+																																...currentTodo,
+																																status: currentTodo.status === "true" ? "false" : "true",
+																																statusLoading: false,
+																															},
+																														},
+																													}
+																												else return todos
 																											}
 																										})
 																									})
@@ -516,19 +548,39 @@ const ToDo = () => {
 																																	.then(() => {
 																																		setTodos((todos) => {
 																																			const { [key]: currentImportant } = todos.important
-																																			return {
-																																				...todos,
-																																				[getDate(currentImportant.date) + "_children"]: {
-																																					...todos[getDate(currentImportant.date) + "_children"],
-																																					[key]: {
-																																						...todos[getDate(currentImportant.date) + "_children"][key],
-																																						[childKey]: {
-																																							...todos[getDate(currentImportant.date) + "_children"][key][childKey],
-																																							status: todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
-																																							statusLoading: false,
+																																			if (currentImportant)
+																																				return {
+																																					...todos,
+																																					[getDate(currentImportant.date) + "_children"]: {
+																																						...todos[getDate(currentImportant.date) + "_children"],
+																																						[key]: {
+																																							...todos[getDate(currentImportant.date) + "_children"][key],
+																																							[childKey]: {
+																																								...todos[getDate(currentImportant.date) + "_children"][key][childKey],
+																																								status: todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
+																																								statusLoading: false,
+																																							},
 																																						},
 																																					},
-																																				},
+																																				}
+																																			else {
+																																				const currentTodo = searchItem(todos, key)
+																																				if (currentTodo)
+																																					return {
+																																						...todos,
+																																						[getDate(currentTodo.date) + "_children"]: {
+																																							...todos[getDate(currentTodo.date) + "_children"],
+																																							[key]: {
+																																								...todos[getDate(currentTodo.date) + "_children"][key],
+																																								[childKey]: {
+																																									...todos[getDate(currentTodo.date) + "_children"][key][childKey],
+																																									status: todos[getDate(currentTodo.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
+																																									statusLoading: false,
+																																								},
+																																							},
+																																						},
+																																					}
+																																				else return todos
 																																			}
 																																		})
 																																	})
@@ -685,16 +737,33 @@ const ToDo = () => {
 																									.then(() => {
 																										setTodos((todos) => {
 																											const { [key]: currentTodo } = todos[date]
-																											return {
-																												...todos,
-																												[date]: {
-																													...todos[date],
-																													[key]: {
-																														...currentTodo,
-																														status: currentTodo.status === "true" ? "false" : "true",
-																														statusLoading: false,
+																											if (currentTodo)
+																												return {
+																													...todos,
+																													[date]: {
+																														...todos[date],
+																														[key]: {
+																															...currentTodo,
+																															status: currentTodo.status === "true" ? "false" : "true",
+																															statusLoading: false,
+																														},
 																													},
-																												},
+																												}
+																											else {
+																												const currentImportant = searchItem(todos, key)
+																												if (currentImportant)
+																													return {
+																														...todos,
+																														important: {
+																															...todos.important,
+																															[currentImportant._id]: {
+																																...currentImportant,
+																																status: currentImportant.status === "true" ? "false" : "true",
+																																statusLoading: false,
+																															},
+																														},
+																													}
+																												else return todos
 																											}
 																										})
 																									})
@@ -811,19 +880,39 @@ const ToDo = () => {
 																																	.then(() => {
 																																		setTodos((todos) => {
 																																			const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
-																																			return {
-																																				...todos,
-																																				[getDate(currentTodo.date) + "_children"]: {
-																																					...todos[getDate(currentTodo.date) + "_children"],
-																																					[key]: {
-																																						...todos[getDate(currentTodo.date) + "_children"][key],
-																																						[childKey]: {
-																																							...currentChild,
-																																							status: currentChild.status === "true" ? "false" : "true",
-																																							statusLoading: false,
+																																			if (currentChild)
+																																				return {
+																																					...todos,
+																																					[getDate(currentTodo.date) + "_children"]: {
+																																						...todos[getDate(currentTodo.date) + "_children"],
+																																						[key]: {
+																																							...todos[getDate(currentTodo.date) + "_children"][key],
+																																							[childKey]: {
+																																								...currentChild,
+																																								status: currentChild.status === "true" ? "false" : "true",
+																																								statusLoading: false,
+																																							},
 																																						},
 																																					},
-																																				},
+																																				}
+																																			else {
+																																				const currentTodo = searchItem(todos, key)
+																																				if (currentTodo)
+																																					return {
+																																						...todos,
+																																						[getDate(currentTodo.date) + "_children"]: {
+																																							...todos[getDate(currentTodo.date) + "_children"],
+																																							[key]: {
+																																								...todos[getDate(currentTodo.date) + "_children"][key],
+																																								[childKey]: {
+																																									...todos[getDate(currentTodo.date) + "_children"][key][childKey],
+																																									status: todos[getDate(currentTodo.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
+																																									statusLoading: false,
+																																								},
+																																							},
+																																						},
+																																					}
+																																				else return todos
 																																			}
 																																		})
 																																	})

@@ -8,7 +8,7 @@ export function useMain() {
 }
 
 const MainComponent = ({ children }) => {
-	const apiUrl = "https://todoserver-g7to.onrender.com/"
+	const apiUrl = process.env.REACT_APP_ENV_SERVER_URL
 	const [appLoaded, setAppLoaded] = useState(false)
 	const location = useLocation()
 	const [displayLocation, setDisplayLocation] = useState(location)
