@@ -395,7 +395,7 @@ const ToDo = () => {
 																							})
 																						}}
 																						icon={faInfoCircle}
-																						className="cursor-pointer me-2 text-success"
+																						className="cursor-pointer me-2 text-primary"
 																					/>
 																				) : (
 																					<></>
@@ -597,7 +597,7 @@ const ToDo = () => {
 																															})
 																														}}
 																														icon={faInfoCircle}
-																														className="cursor-pointer me-2 text-success"
+																														className="cursor-pointer me-2 text-primary"
 																													/>
 																												) : (
 																													<></>
@@ -759,7 +759,7 @@ const ToDo = () => {
 																							})
 																						}}
 																						icon={faInfoCircle}
-																						className="cursor-pointer me-2 text-success"
+																						className="cursor-pointer me-2 text-primary"
 																					/>
 																				) : (
 																					<></>
@@ -971,7 +971,7 @@ const ToDo = () => {
 																															})
 																														}}
 																														icon={faInfoCircle}
-																														className="cursor-pointer me-2 text-success"
+																														className="cursor-pointer me-2 text-primary"
 																													/>
 																												) : (
 																													<></>
