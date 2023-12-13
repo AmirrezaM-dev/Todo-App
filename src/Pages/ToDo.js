@@ -7,7 +7,7 @@ import Loading from "./Loading"
 import { Button, Col, Collapse, Container, Form, ListGroup, Nav, Navbar, Row } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faEye, faEyeSlash, faPencil, faPlus, faSpinner, faSquareCheck, faStar, faX } from "@fortawesome/free-solid-svg-icons"
+import { faEye, faEyeSlash, faInfoCircle, faPencil, faPlus, faSpinner, faSquareCheck, faStar, faX } from "@fortawesome/free-solid-svg-icons"
 import { faSquare, faStar as farStar } from "@fortawesome/free-regular-svg-icons"
 import Swal from "sweetalert2"
 
@@ -189,38 +189,77 @@ const ToDo = () => {
 					else {
 						if (wasImportant && isImportant)
 							setTodos((todos) => {
-								return {
-									...todos,
-									important: {
-										...todos.important,
-										[todo._id]: { ...todo, ...sendData },
-									},
+								if (todos.important[todo._id])
+									return {
+										...todos,
+										important: {
+											...todos.important,
+											[todo._id]: { ...todo, ...sendData },
+										},
+									}
+								else {
+									const currentTodo = searchItem(todos, todo._id)
+									if (currentTodo) {
+										return {
+											...todos,
+											important: {
+												...todos.important,
+												[currentTodo._id]: { ...currentTodo, ...sendData },
+											},
+										}
+									} else return todos
 								}
 							})
 						else if (wasImportant && !isImportant) {
 							const { [todo._id]: currentImportant, ...important } = todos.important
-							setTodos((todos) => {
-								return {
-									...todos,
-									important,
-									[getDate(currentImportant.date)]: {
-										...todos[getDate(currentImportant.date)],
-										[currentImportant._id]: { ...currentImportant, ...sendData },
-									},
-								}
-							})
+							if (currentImportant)
+								setTodos((todos) => {
+									return {
+										...todos,
+										important,
+										[getDate(currentImportant.date)]: {
+											...todos[getDate(currentImportant.date)],
+											[currentImportant._id]: { ...currentImportant, ...sendData },
+										},
+									}
+								})
+							else {
+								const currentTodo = searchItem(todos, todo._id)
+								if (currentTodo) {
+									return {
+										...todos,
+										[getDate(currentTodo.date)]: {
+											...todos[getDate(currentTodo.date)],
+											[todo._id]: { ...currentTodo, ...sendData },
+										},
+									}
+								} else return todos
+							}
 						} else if (!wasImportant && isImportant) {
 							const { [todo._id]: currentTodo, ...restTodos } = todos[getDate(todo.date)]
-							setTodos((todos) => {
-								return {
-									...todos,
-									important: {
-										...todos.important,
-										[currentTodo._id]: { ...currentTodo, ...sendData },
-									},
-									[getDate(todo.date)]: restTodos,
-								}
-							})
+							if (currentTodo)
+								setTodos((todos) => {
+									return {
+										...todos,
+										important: {
+											...todos.important,
+											[currentTodo._id]: { ...currentTodo, ...sendData },
+										},
+										[getDate(todo.date)]: restTodos,
+									}
+								})
+							else {
+								const currentImportant = searchItem(todos, todo._id)
+								if (currentImportant) {
+									return {
+										...todos,
+										important: {
+											...todos.important,
+											[currentTodo._id]: { ...currentTodo, ...sendData },
+										},
+									}
+								} else return todos
+							}
 						}
 					}
 					Swal.fire({
@@ -287,6 +326,7 @@ const ToDo = () => {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [date])
+
 	return (
 		<Routes>
 			<Route
@@ -335,569 +375,639 @@ const ToDo = () => {
 													</Container>
 												</Navbar>
 
-												{todos.important && Object.keys(todos.important).length ? (
-													<ListGroup>
-														{Object.keys(todos.important).map((key) => {
-															const { [key]: currentImportant } = todos.important
-															return (
-																<ListGroup.Item className="bg-transparent text-white mx-3 shadow" key={key}>
-																	<Row>
-																		<Col sm={8} className="text-center text-sm-start">
-																			{currentImportant.title}
-																		</Col>
-																		<Col sm={4} className="text-center text-sm-end">
-																			<FontAwesomeIcon
-																				onClick={() => {
-																					addItem(currentImportant._id)
-																				}}
-																				icon={faPlus}
-																				className="cursor-pointer mx-1 text-success"
-																			/>
-																			<FontAwesomeIcon
-																				onClick={
-																					!currentImportant.importantLoading
-																						? () => {
-																								setTodos((todos) => {
-																									const { [key]: currentImportant } = todos.important
-																									return {
-																										...todos,
-																										important: { ...todos.important, [currentImportant._id]: { ...currentImportant, importantLoading: true } },
-																									}
-																								})
-																								authApi
-																									.post("/api/todo/important", {
-																										_id: key,
-																										to: false,
-																									})
-																									.then(() => {
-																										todos[getDate(currentImportant.date)]
-																											? setTodos((todos) => {
-																													const { [key]: currentImportant, ...restImportant } = todos.important
-																													return {
-																														...todos,
-																														important: restImportant,
-																														[getDate(currentImportant.date)]: {
-																															...todos[getDate(currentImportant.date)],
-																															[currentImportant._id]: { ...currentImportant, importantLoading: false },
-																														},
-																													}
-																											  })
-																											: setTodos((todos) => {
-																													const { [key]: currentImportant, ...restImportant } = todos.important
-																													return {
-																														...todos,
-																														important: restImportant,
-																													}
-																											  })
-																									})
-																						  }
-																						: () => {}
-																				}
-																				icon={currentImportant.importantLoading ? faSpinner : faStar}
-																				spin={currentImportant.importantLoading}
-																				className="cursor-pointer mx-1 text-warning"
-																			/>
-																			<FontAwesomeIcon
-																				onClick={
-																					!currentImportant.statusLoading
-																						? () => {
-																								setTodos((todos) => {
-																									const { [key]: currentImportant } = todos.important
-																									return { ...todos, important: { ...todos.important, [currentImportant._id]: { ...currentImportant, statusLoading: true } } }
-																								})
-																								authApi
-																									.post("/api/todo/status", {
-																										_id: key,
-																										to: currentImportant.status === "true" ? false : true,
-																									})
-																									.then(() => {
-																										setTodos((todos) => {
-																											const { [key]: currentImportant } = todos.important
-																											if (currentImportant)
-																												return {
-																													...todos,
-																													important: {
-																														...todos.important,
-																														[key]: {
-																															...currentImportant,
-																															status: currentImportant.status === "true" ? "false" : "true",
-																															statusLoading: false,
-																														},
-																													},
-																												}
-																											else {
-																												const currentTodo = searchItem(todos, key)
-																												if (currentTodo)
-																													return {
-																														...todos,
-																														[getDate(currentTodo.date)]: {
-																															...todos[getDate(currentTodo.date)],
-																															[currentTodo._id]: {
-																																...currentTodo,
-																																status: currentTodo.status === "true" ? "false" : "true",
-																																statusLoading: false,
-																															},
-																														},
-																													}
-																												else return todos
-																											}
-																										})
-																									})
-																						  }
-																						: () => {}
-																				}
-																				icon={currentImportant.statusLoading ? faSpinner : currentImportant.status === "true" ? faSquareCheck : faSquare}
-																				spin={currentImportant.statusLoading}
-																				className="cursor-pointer mx-1 text-secondary"
-																			/>
-																			{todos[getDate(currentImportant.date) + "_children"] && todos[getDate(currentImportant.date) + "_children"][key] && Object.keys(todos[getDate(currentImportant.date) + "_children"][key]).length ? (
-																				<FontAwesomeIcon
-																					onClick={() => {
-																						setTodos((todos) => {
-																							const { [key]: currentImportant } = todos.important
-																							return {
-																								...todos,
-																								important: {
-																									...todos.important,
-																									[key]: {
-																										...currentImportant,
-																										isCollapsed: !currentImportant.isCollapsed,
-																									},
-																								},
-																							}
-																						})
-																					}}
-																					icon={currentImportant.isCollapsed ? faEyeSlash : faEye}
-																					className="cursor-pointer mx-1 text-primary"
-																				/>
-																			) : (
-																				<></>
-																			)}
-																			<FontAwesomeIcon onClick={() => editItem(currentImportant, true)} icon={faPencil} className="cursor-pointer mx-1 text-info" />
-																			<FontAwesomeIcon
-																				onClick={
-																					!currentImportant.removeLoading
-																						? () => {
-																								setTodos((todos) => {
-																									const { [key]: currentImportant } = todos.important
-																									return {
-																										...todos,
-																										important: { ...todos.important, [currentImportant._id]: { ...currentImportant, removeLoading: true } },
-																									}
-																								})
-																								authApi
-																									.post("/api/todo/remove", {
-																										_id: key,
-																									})
-																									.then(() => {
-																										setTodos((todos) => {
-																											const { [key]: currentImportant, ...restImportant } = todos.important
-																											return {
-																												...todos,
-																												important: restImportant,
-																											}
-																										})
-																									})
-																						  }
-																						: () => {}
-																				}
-																				icon={currentImportant.removeLoading ? faSpinner : faX}
-																				spin={currentImportant.removeLoading}
-																				className="cursor-pointer mx-1 text-danger"
-																			/>
-																		</Col>
-																		<Collapse in={currentImportant.isCollapsed && todos[getDate(currentImportant.date) + "_children"][key] && Object.keys(todos[getDate(currentImportant.date) + "_children"][key]).length ? true : false} className="mt-3">
-																			<Col sm={12}>
-																				<div className="text-center mb-2">{currentImportant.details}</div>
-																				{todos[getDate(currentImportant.date) + "_children"] && todos[getDate(currentImportant.date) + "_children"][key] ? (
-																					<ListGroup>
-																						{Object.keys(todos[getDate(currentImportant.date) + "_children"][key]).map((childKey) => {
-																							const { [childKey]: currentImportantChild } = todos[getDate(currentImportant.date) + "_children"][key]
-																							return (
-																								<ListGroup.Item key={childKey} className="bg-transparent text-white">
-																									<Row>
-																										<Col sm={9} className="text-center text-sm-start">
-																											{currentImportantChild.title}
-																										</Col>
-																										<Col sm={3} className="text-center text-sm-end">
-																											<FontAwesomeIcon
-																												onClick={
-																													!currentImportantChild.statusLoading
-																														? () => {
-																																setTodos((todos) => {
-																																	const { [key]: currentImportant } = todos.important
-																																	return {
-																																		...todos,
-																																		[getDate(currentImportant.date) + "_children"]: {
-																																			...todos[getDate(currentImportant.date) + "_children"],
-																																			[key]: {
-																																				...todos[getDate(currentImportant.date) + "_children"][key],
-																																				[childKey]: {
-																																					...todos[getDate(currentImportant.date) + "_children"][key][childKey],
-																																					statusLoading: true,
-																																				},
-																																			},
-																																		},
-																																	}
-																																})
-																																authApi
-																																	.post("/api/todo/status", {
-																																		_id: childKey,
-																																		to: todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? false : true,
-																																	})
-																																	.then(() => {
-																																		setTodos((todos) => {
-																																			const { [key]: currentImportant } = todos.important
-																																			if (currentImportant)
-																																				return {
-																																					...todos,
-																																					[getDate(currentImportant.date) + "_children"]: {
-																																						...todos[getDate(currentImportant.date) + "_children"],
-																																						[key]: {
-																																							...todos[getDate(currentImportant.date) + "_children"][key],
-																																							[childKey]: {
-																																								...todos[getDate(currentImportant.date) + "_children"][key][childKey],
-																																								status: todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
-																																								statusLoading: false,
-																																							},
-																																						},
-																																					},
-																																				}
-																																			else {
-																																				const currentTodo = searchItem(todos, key)
-																																				if (currentTodo)
-																																					return {
-																																						...todos,
-																																						[getDate(currentTodo.date) + "_children"]: {
-																																							...todos[getDate(currentTodo.date) + "_children"],
-																																							[key]: {
-																																								...todos[getDate(currentTodo.date) + "_children"][key],
-																																								[childKey]: {
-																																									...todos[getDate(currentTodo.date) + "_children"][key][childKey],
-																																									status: todos[getDate(currentTodo.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
-																																									statusLoading: false,
-																																								},
-																																							},
-																																						},
-																																					}
-																																				else return todos
-																																			}
-																																		})
-																																	})
-																														  }
-																														: () => {}
-																												}
-																												icon={currentImportantChild.statusLoading ? faSpinner : todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? faSquareCheck : faSquare}
-																												spin={currentImportantChild.statusLoading}
-																												className="cursor-pointer mx-1 text-secondary"
-																											/>
-																											<FontAwesomeIcon onClick={() => editItem(todos[getDate(currentImportant.date) + "_children"][key][childKey], false)} icon={faPencil} className="cursor-pointer mx-1 text-info" />
-																											<FontAwesomeIcon
-																												onClick={
-																													!currentImportantChild.removeLoading
-																														? () => {
-																																setTodos((todos) => {
-																																	const { [key]: currentImportant } = todos.important
-																																	return {
-																																		...todos,
-																																		[getDate(currentImportant.date) + "_children"]: {
-																																			...todos[getDate(currentImportant.date) + "_children"],
-																																			[key]: {
-																																				...todos[getDate(currentImportant.date) + "_children"][key],
-																																				[childKey]: {
-																																					...todos[getDate(currentImportant.date) + "_children"][key][childKey],
-																																					removeLoading: true,
-																																				},
-																																			},
-																																		},
-																																	}
-																																})
-																																authApi
-																																	.post("/api/todo/remove", {
-																																		_id: childKey,
-																																	})
-																																	.then(() => {
-																																		setTodos((todos) => {
-																																			const { [childKey]: currentImportantChild, ...restChildren } = todos[getDate(currentImportant.date) + "_children"][key]
-																																			return {
-																																				...todos,
-																																				[getDate(currentImportant.date) + "_children"]: {
-																																					...todos[getDate(currentImportant.date) + "_children"],
-																																					[key]: restChildren,
-																																				},
-																																			}
-																																		})
-																																	})
-																														  }
-																														: () => {}
-																												}
-																												icon={currentImportantChild.removeLoading ? faSpinner : faX}
-																												spin={currentImportantChild.removeLoading}
-																												className="cursor-pointer mx-1 text-danger"
-																											/>
-																										</Col>
-																									</Row>
-																								</ListGroup.Item>
-																							)
-																						})}
-																					</ListGroup>
+												<div>
+													{todos.important && Object.keys(todos.important).length ? (
+														<ListGroup>
+															{Object.keys(todos.important).map((key) => {
+																const { [key]: currentImportant } = todos.important
+																return (
+																	<ListGroup.Item className="bg-transparent text-white mx-3 shadow" key={key}>
+																		<Row>
+																			<Col sm={8} className="text-center text-sm-start">
+																				{currentImportant.details && currentImportant.details.length ? (
+																					<FontAwesomeIcon
+																						onClick={() => {
+																							Swal.fire({
+																								html: `<p class="text-white">${currentImportant.details}</p>`,
+																								showCancelButton: true,
+																								showConfirmButton: false,
+																								cancelButtonText: "Close",
+																							})
+																						}}
+																						icon={faInfoCircle}
+																						className="cursor-pointer me-2 text-success"
+																					/>
 																				) : (
 																					<></>
 																				)}
+																				{currentImportant.title}
 																			</Col>
-																		</Collapse>
-																	</Row>
-																</ListGroup.Item>
-															)
-														})}
-													</ListGroup>
-												) : (
-													<></>
-												)}
-												{todos.important && Object.keys(todos.important).length && todos[date] && Object.keys(todos[date]).length ? <hr /> : <></>}
-												{todos[date] && Object.keys(todos[date]).length ? (
-													<ListGroup>
-														{Object.keys(todos[date]).map((key) => {
-															const { [key]: currentTodo } = todos[date]
-															return (
-																<ListGroup.Item className="bg-transparent text-white mx-3" key={key}>
-																	<Row>
-																		<Col sm={8} className="text-center text-sm-start">
-																			{currentTodo.title}
-																		</Col>
-																		<Col sm={4} className="text-center text-sm-end">
-																			<FontAwesomeIcon
-																				onClick={() => {
-																					addItem(currentTodo._id)
-																				}}
-																				icon={faPlus}
-																				className="cursor-pointer mx-1 text-success"
-																			/>
-																			<FontAwesomeIcon
-																				onClick={
-																					!currentTodo.importantLoading
-																						? () => {
-																								setTodos((todos) => {
-																									const { [key]: currentTodo } = todos[date]
-																									return {
-																										...todos,
-																										[date]: {
-																											...todos[date],
-																											[currentTodo._id]: { ...currentTodo, importantLoading: true },
-																										},
-																									}
-																								})
-																								authApi
-																									.post("/api/todo/important", {
-																										_id: key,
-																										to: true,
+																			<Col sm={4} className="text-center text-sm-end">
+																				<FontAwesomeIcon
+																					onClick={() => {
+																						addItem(currentImportant._id)
+																					}}
+																					icon={faPlus}
+																					className="cursor-pointer mx-1 text-success"
+																				/>
+																				<FontAwesomeIcon
+																					onClick={
+																						!currentImportant.importantLoading
+																							? () => {
+																									setTodos((todos) => {
+																										const { [key]: currentImportant } = todos.important
+																										return {
+																											...todos,
+																											important: { ...todos.important, [currentImportant._id]: { ...currentImportant, importantLoading: true } },
+																										}
 																									})
-																									.then(() => {
-																										setTodos((todos) => {
-																											const { [key]: currentTodo, ...restTodos } = todos[date]
-																											return {
-																												...todos,
-																												[date]: restTodos,
-																												important: {
-																													...todos.important,
-																													[key]: { ...currentTodo, importantLoading: false },
-																												},
-																											}
+																									authApi
+																										.post("/api/todo/important", {
+																											_id: key,
+																											to: false,
 																										})
+																										.then(() => {
+																											todos[getDate(currentImportant.date)]
+																												? setTodos((todos) => {
+																														const { [key]: currentImportant, ...important } = todos.important
+																														return {
+																															...todos,
+																															important,
+																															[getDate(currentImportant.date)]: {
+																																...todos[getDate(currentImportant.date)],
+																																[currentImportant._id]: { ...currentImportant, importantLoading: false },
+																															},
+																														}
+																												  })
+																												: setTodos((todos) => {
+																														const { [key]: currentImportant, ...important } = todos.important
+																														return {
+																															...todos,
+																															important,
+																														}
+																												  })
+																										})
+																							  }
+																							: () => {}
+																					}
+																					icon={currentImportant.importantLoading ? faSpinner : faStar}
+																					spin={currentImportant.importantLoading}
+																					className="cursor-pointer mx-1 text-warning"
+																				/>
+																				<FontAwesomeIcon
+																					onClick={
+																						!currentImportant.statusLoading
+																							? () => {
+																									setTodos((todos) => {
+																										const { [key]: currentImportant } = todos.important
+																										return { ...todos, important: { ...todos.important, [currentImportant._id]: { ...currentImportant, statusLoading: true } } }
 																									})
-																						  }
-																						: () => {}
-																				}
-																				icon={currentTodo.importantLoading ? faSpinner : farStar}
-																				spin={currentTodo.importantLoading}
-																				className="cursor-pointer mx-1 text-warning"
-																			/>
-																			<FontAwesomeIcon
-																				onClick={
-																					!currentTodo.statusLoading
-																						? () => {
-																								setTodos((todos) => {
-																									const { [key]: currentTodo } = todos[date]
-																									return {
-																										...todos,
-																										[date]: {
-																											...todos[date],
-																											[key]: {
-																												...currentTodo,
-																												statusLoading: true,
-																											},
-																										},
-																									}
-																								})
-																								authApi
-																									.post("/api/todo/status", {
-																										_id: key,
-																										to: currentTodo.status === "true" ? false : true,
-																									})
-																									.then(() => {
-																										setTodos((todos) => {
-																											const { [key]: currentTodo } = todos[date]
-																											if (currentTodo)
-																												return {
-																													...todos,
-																													[date]: {
-																														...todos[date],
-																														[key]: {
-																															...currentTodo,
-																															status: currentTodo.status === "true" ? "false" : "true",
-																															statusLoading: false,
-																														},
-																													},
-																												}
-																											else {
-																												const currentImportant = searchItem(todos, key)
+																									authApi
+																										.post("/api/todo/status", {
+																											_id: key,
+																											to: currentImportant.status === "true" ? false : true,
+																										})
+																										.then(() => {
+																											setTodos((todos) => {
+																												const { [key]: currentImportant } = todos.important
 																												if (currentImportant)
 																													return {
 																														...todos,
 																														important: {
 																															...todos.important,
-																															[currentImportant._id]: {
+																															[key]: {
 																																...currentImportant,
 																																status: currentImportant.status === "true" ? "false" : "true",
 																																statusLoading: false,
 																															},
 																														},
 																													}
-																												else return todos
-																											}
+																												else {
+																													const currentTodo = searchItem(todos, key)
+																													if (currentTodo)
+																														return {
+																															...todos,
+																															[getDate(currentTodo.date)]: {
+																																...todos[getDate(currentTodo.date)],
+																																[currentTodo._id]: {
+																																	...currentTodo,
+																																	status: currentTodo.status === "true" ? "false" : "true",
+																																	statusLoading: false,
+																																},
+																															},
+																														}
+																													else return todos
+																												}
+																											})
 																										})
-																									})
-																						  }
-																						: () => {}
-																				}
-																				icon={currentTodo.statusLoading ? faSpinner : currentTodo.status === "true" ? faSquareCheck : faSquare}
-																				spin={currentTodo.statusLoading}
-																				className="cursor-pointer mx-1 text-secondary"
-																			/>
-																			{todos[getDate(currentTodo.date) + "_children"] && todos[getDate(currentTodo.date) + "_children"][key] && Object.keys(todos[getDate(currentTodo.date) + "_children"][key]).length ? (
-																				<FontAwesomeIcon
-																					onClick={() => {
-																						setTodos((todos) => {
-																							const { [key]: currentTodo } = todos[date]
-																							return {
-																								...todos,
-																								[date]: {
-																									...todos[date],
-																									[key]: {
-																										...currentTodo,
-																										isCollapsed: !currentTodo.isCollapsed,
-																									},
-																								},
-																							}
-																						})
-																					}}
-																					icon={currentTodo.isCollapsed ? faEyeSlash : faEye}
-																					className="cursor-pointer mx-1 text-primary"
+																							  }
+																							: () => {}
+																					}
+																					icon={currentImportant.statusLoading ? faSpinner : currentImportant.status === "true" ? faSquareCheck : faSquare}
+																					spin={currentImportant.statusLoading}
+																					className="cursor-pointer mx-1 text-secondary"
 																				/>
-																			) : (
-																				<></>
-																			)}
-																			<FontAwesomeIcon onClick={() => editItem(currentTodo, false)} icon={faPencil} className="cursor-pointer mx-1 text-info" />
-																			<FontAwesomeIcon
-																				onClick={
-																					!currentTodo.removeLoading
-																						? () => {
-																								setTodos((todos) => {
-																									const { [key]: currentTodo } = todos[date]
-																									return {
-																										...todos,
-																										[date]: {
-																											...todos[date],
-																											[key]: {
-																												...currentTodo,
-																												removeLoading: true,
-																											},
+																				{todos[getDate(currentImportant.date) + "_children"] && todos[getDate(currentImportant.date) + "_children"][key] && Object.keys(todos[getDate(currentImportant.date) + "_children"][key]).length ? (
+																					<FontAwesomeIcon
+																						onClick={() => {
+																							setTodos((todos) => {
+																								const { [key]: currentImportant } = todos.important
+																								return {
+																									...todos,
+																									important: {
+																										...todos.important,
+																										[key]: {
+																											...currentImportant,
+																											isCollapsed: !currentImportant.isCollapsed,
 																										},
-																									}
-																								})
-																								authApi
-																									.post("/api/todo/remove", {
-																										_id: key,
+																									},
+																								}
+																							})
+																						}}
+																						icon={currentImportant.isCollapsed ? faEyeSlash : faEye}
+																						className="cursor-pointer mx-1 text-primary"
+																					/>
+																				) : (
+																					<></>
+																				)}
+																				<FontAwesomeIcon onClick={() => editItem(currentImportant, true)} icon={faPencil} className="cursor-pointer mx-1 text-info" />
+																				<FontAwesomeIcon
+																					onClick={
+																						!currentImportant.removeLoading
+																							? () => {
+																									setTodos((todos) => {
+																										const { [key]: currentImportant } = todos.important
+																										return {
+																											...todos,
+																											important: { ...todos.important, [currentImportant._id]: { ...currentImportant, removeLoading: true } },
+																										}
 																									})
-																									.then(() => {
-																										setTodos((todos) => {
-																											const { [key]: currentTodo, ...restTodos } = todos[date]
-																											return {
-																												...todos,
-																												[date]: {
-																													...restTodos,
-																												},
-																											}
+																									authApi
+																										.post("/api/todo/remove", {
+																											_id: key,
 																										})
-																									})
-																						  }
-																						: () => {}
-																				}
-																				icon={currentTodo.removeLoading ? faSpinner : faX}
-																				spin={currentTodo.removeLoading}
-																				className="cursor-pointer mx-1 text-danger"
-																			/>
-																		</Col>
-																		<Collapse in={currentTodo.isCollapsed && todos[getDate(currentTodo.date) + "_children"][key] && Object.keys(todos[getDate(currentTodo.date) + "_children"][key]).length ? true : false} className="mt-3">
-																			<Col sm={12}>
-																				<div className="text-center mb-2">{currentTodo.details}</div>
-																				{todos[getDate(currentTodo.date) + "_children"] && todos[getDate(currentTodo.date) + "_children"][key] ? (
-																					<ListGroup>
-																						{Object.keys(todos[getDate(currentTodo.date) + "_children"][key]).map((childKey) => {
-																							const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
-																							return (
-																								<ListGroup.Item key={childKey} className="bg-transparent text-white">
-																									<Row>
-																										<Col sm={9} className="text-center text-sm-start">
-																											{currentChild.title}
-																										</Col>
-																										<Col sm={3} className="text-center text-sm-end">
-																											<FontAwesomeIcon
-																												onClick={
-																													!currentChild.statusLoading
-																														? () => {
-																																setTodos((todos) => {
-																																	const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
-																																	return {
-																																		...todos,
-																																		[getDate(currentTodo.date) + "_children"]: {
-																																			...todos[getDate(currentTodo.date) + "_children"],
-																																			[key]: {
-																																				...todos[getDate(currentTodo.date) + "_children"][key],
-																																				[childKey]: {
-																																					...currentChild,
-																																					statusLoading: true,
+																										.then(() => {
+																											setTodos((todos) => {
+																												const { [key]: currentImportant, ...important } = todos.important
+																												if (currentImportant)
+																													return {
+																														...todos,
+																														important,
+																													}
+																												else {
+																													const currentTodo = searchItem(todos, key)
+																													if (currentTodo) {
+																														const { [key]: removingCurrentTodo, ...restTodos } = todos[getDate(currentTodo.date)]
+																														return {
+																															...todos,
+																															[getDate(currentTodo.date)]: {
+																																...restTodos,
+																															},
+																														}
+																													} else return todos
+																												}
+																											})
+																										})
+																							  }
+																							: () => {}
+																					}
+																					icon={currentImportant.removeLoading ? faSpinner : faX}
+																					spin={currentImportant.removeLoading}
+																					className="cursor-pointer mx-1 text-danger"
+																				/>
+																			</Col>
+																			<Collapse in={currentImportant.isCollapsed && todos[getDate(currentImportant.date) + "_children"][key] && Object.keys(todos[getDate(currentImportant.date) + "_children"][key]).length ? true : false} className="mt-3">
+																				<Col sm={12}>
+																					{todos[getDate(currentImportant.date) + "_children"] && todos[getDate(currentImportant.date) + "_children"][key] ? (
+																						<ListGroup>
+																							{Object.keys(todos[getDate(currentImportant.date) + "_children"][key]).map((childKey) => {
+																								const { [childKey]: currentChild } = todos[getDate(currentImportant.date) + "_children"][key]
+																								return (
+																									<ListGroup.Item key={childKey} className="bg-transparent text-white">
+																										<Row>
+																											<Col sm={9} className="text-center text-sm-start">
+																												{currentChild.details && currentChild.details.length ? (
+																													<FontAwesomeIcon
+																														onClick={() => {
+																															Swal.fire({
+																																html: `<p class="text-white">${currentChild.details}</p>`,
+																																showCancelButton: true,
+																																showConfirmButton: false,
+																																cancelButtonText: "Close",
+																															})
+																														}}
+																														icon={faInfoCircle}
+																														className="cursor-pointer me-2 text-success"
+																													/>
+																												) : (
+																													<></>
+																												)}
+																												{currentChild.title}
+																											</Col>
+																											<Col sm={3} className="text-center text-sm-end">
+																												<FontAwesomeIcon
+																													onClick={
+																														!currentChild.statusLoading
+																															? () => {
+																																	setTodos((todos) => {
+																																		const { [key]: currentImportant } = todos.important
+																																		return {
+																																			...todos,
+																																			[getDate(currentImportant.date) + "_children"]: {
+																																				...todos[getDate(currentImportant.date) + "_children"],
+																																				[key]: {
+																																					...todos[getDate(currentImportant.date) + "_children"][key],
+																																					[childKey]: {
+																																						...todos[getDate(currentImportant.date) + "_children"][key][childKey],
+																																						statusLoading: true,
+																																					},
 																																				},
 																																			},
-																																		},
-																																	}
-																																})
-																																authApi
-																																	.post("/api/todo/status", {
-																																		_id: childKey,
-																																		to: currentChild.status === "true" ? false : true,
+																																		}
 																																	})
-																																	.then(() => {
-																																		setTodos((todos) => {
-																																			const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
-																																			if (currentChild)
-																																				return {
-																																					...todos,
-																																					[getDate(currentTodo.date) + "_children"]: {
-																																						...todos[getDate(currentTodo.date) + "_children"],
-																																						[key]: {
-																																							...todos[getDate(currentTodo.date) + "_children"][key],
-																																							[childKey]: {
-																																								...currentChild,
-																																								status: currentChild.status === "true" ? "false" : "true",
-																																								statusLoading: false,
+																																	authApi
+																																		.post("/api/todo/status", {
+																																			_id: childKey,
+																																			to: todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? false : true,
+																																		})
+																																		.then(() => {
+																																			setTodos((todos) => {
+																																				const { [key]: currentImportant } = todos.important
+																																				if (currentImportant)
+																																					return {
+																																						...todos,
+																																						[getDate(currentImportant.date) + "_children"]: {
+																																							...todos[getDate(currentImportant.date) + "_children"],
+																																							[key]: {
+																																								...todos[getDate(currentImportant.date) + "_children"][key],
+																																								[childKey]: {
+																																									...todos[getDate(currentImportant.date) + "_children"][key][childKey],
+																																									status: todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
+																																									statusLoading: false,
+																																								},
 																																							},
 																																						},
+																																					}
+																																				else {
+																																					const currentTodo = searchItem(todos, key)
+																																					if (currentTodo)
+																																						return {
+																																							...todos,
+																																							[getDate(currentTodo.date) + "_children"]: {
+																																								...todos[getDate(currentTodo.date) + "_children"],
+																																								[key]: {
+																																									...todos[getDate(currentTodo.date) + "_children"][key],
+																																									[childKey]: {
+																																										...todos[getDate(currentTodo.date) + "_children"][key][childKey],
+																																										status: todos[getDate(currentTodo.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
+																																										statusLoading: false,
+																																									},
+																																								},
+																																							},
+																																						}
+																																					else return todos
+																																				}
+																																			})
+																																		})
+																															  }
+																															: () => {}
+																													}
+																													icon={currentChild.statusLoading ? faSpinner : todos[getDate(currentImportant.date) + "_children"][key][childKey].status === "true" ? faSquareCheck : faSquare}
+																													spin={currentChild.statusLoading}
+																													className="cursor-pointer mx-1 text-secondary"
+																												/>
+																												<FontAwesomeIcon onClick={() => editItem(todos[getDate(currentImportant.date) + "_children"][key][childKey], false)} icon={faPencil} className="cursor-pointer mx-1 text-info" />
+																												<FontAwesomeIcon
+																													onClick={
+																														!currentChild.removeLoading
+																															? () => {
+																																	setTodos((todos) => {
+																																		const { [key]: currentImportant } = todos.important
+																																		return {
+																																			...todos,
+																																			[getDate(currentImportant.date) + "_children"]: {
+																																				...todos[getDate(currentImportant.date) + "_children"],
+																																				[key]: {
+																																					...todos[getDate(currentImportant.date) + "_children"][key],
+																																					[childKey]: {
+																																						...todos[getDate(currentImportant.date) + "_children"][key][childKey],
+																																						removeLoading: true,
+																																					},
+																																				},
+																																			},
+																																		}
+																																	})
+																																	authApi
+																																		.post("/api/todo/remove", {
+																																			_id: childKey,
+																																		})
+																																		.then(() => {
+																																			setTodos((todos) => {
+																																				const { [childKey]: currentChild, ...restChildren } = todos[getDate(currentImportant.date) + "_children"][key]
+																																				return {
+																																					...todos,
+																																					[getDate(currentImportant.date) + "_children"]: {
+																																						...todos[getDate(currentImportant.date) + "_children"],
+																																						[key]: restChildren,
 																																					},
 																																				}
-																																			else {
-																																				const currentTodo = searchItem(todos, key)
-																																				if (currentTodo)
+																																			})
+																																		})
+																															  }
+																															: () => {}
+																													}
+																													icon={currentChild.removeLoading ? faSpinner : faX}
+																													spin={currentChild.removeLoading}
+																													className="cursor-pointer mx-1 text-danger"
+																												/>
+																											</Col>
+																										</Row>
+																									</ListGroup.Item>
+																								)
+																							})}
+																						</ListGroup>
+																					) : (
+																						<></>
+																					)}
+																				</Col>
+																			</Collapse>
+																		</Row>
+																	</ListGroup.Item>
+																)
+															})}
+														</ListGroup>
+													) : (
+														<></>
+													)}
+													{todos.important && Object.keys(todos.important).length && todos[date] && Object.keys(todos[date]).length ? <hr /> : <></>}
+													{todos[date] && Object.keys(todos[date]).length ? (
+														<ListGroup>
+															{Object.keys(todos[date]).map((key) => {
+																const { [key]: currentTodo } = todos[date]
+																return (
+																	<ListGroup.Item className="bg-transparent text-white mx-3" key={key}>
+																		<Row>
+																			<Col sm={8} className="text-center text-sm-start">
+																				{currentTodo.details && currentTodo.details.length ? (
+																					<FontAwesomeIcon
+																						onClick={() => {
+																							Swal.fire({
+																								html: `<p class="text-white">${currentTodo.details}</p>`,
+																								showCancelButton: true,
+																								showConfirmButton: false,
+																								cancelButtonText: "Close",
+																							})
+																						}}
+																						icon={faInfoCircle}
+																						className="cursor-pointer me-2 text-success"
+																					/>
+																				) : (
+																					<></>
+																				)}
+																				{currentTodo.title}
+																			</Col>
+																			<Col sm={4} className="text-center text-sm-end">
+																				<FontAwesomeIcon
+																					onClick={() => {
+																						addItem(currentTodo._id)
+																					}}
+																					icon={faPlus}
+																					className="cursor-pointer mx-1 text-success"
+																				/>
+																				<FontAwesomeIcon
+																					onClick={
+																						!currentTodo.importantLoading
+																							? () => {
+																									setTodos((todos) => {
+																										const { [key]: currentTodo } = todos[date]
+																										return {
+																											...todos,
+																											[date]: {
+																												...todos[date],
+																												[currentTodo._id]: { ...currentTodo, importantLoading: true },
+																											},
+																										}
+																									})
+																									authApi
+																										.post("/api/todo/important", {
+																											_id: key,
+																											to: true,
+																										})
+																										.then(() => {
+																											setTodos((todos) => {
+																												const { [key]: currentTodo, ...restTodos } = todos[date]
+																												return {
+																													...todos,
+																													[date]: restTodos,
+																													important: {
+																														...todos.important,
+																														[key]: { ...currentTodo, importantLoading: false },
+																													},
+																												}
+																											})
+																										})
+																							  }
+																							: () => {}
+																					}
+																					icon={currentTodo.importantLoading ? faSpinner : farStar}
+																					spin={currentTodo.importantLoading}
+																					className="cursor-pointer mx-1 text-warning"
+																				/>
+																				<FontAwesomeIcon
+																					onClick={
+																						!currentTodo.statusLoading
+																							? () => {
+																									setTodos((todos) => {
+																										const { [key]: currentTodo } = todos[date]
+																										return {
+																											...todos,
+																											[date]: {
+																												...todos[date],
+																												[key]: {
+																													...currentTodo,
+																													statusLoading: true,
+																												},
+																											},
+																										}
+																									})
+																									authApi
+																										.post("/api/todo/status", {
+																											_id: key,
+																											to: currentTodo.status === "true" ? false : true,
+																										})
+																										.then(() => {
+																											setTodos((todos) => {
+																												const { [key]: currentTodo } = todos[date]
+																												if (currentTodo)
+																													return {
+																														...todos,
+																														[date]: {
+																															...todos[date],
+																															[key]: {
+																																...currentTodo,
+																																status: currentTodo.status === "true" ? "false" : "true",
+																																statusLoading: false,
+																															},
+																														},
+																													}
+																												else {
+																													const currentImportant = searchItem(todos, key)
+																													if (currentImportant)
+																														return {
+																															...todos,
+																															important: {
+																																...todos.important,
+																																[currentImportant._id]: {
+																																	...currentImportant,
+																																	status: currentImportant.status === "true" ? "false" : "true",
+																																	statusLoading: false,
+																																},
+																															},
+																														}
+																													else return todos
+																												}
+																											})
+																										})
+																							  }
+																							: () => {}
+																					}
+																					icon={currentTodo.statusLoading ? faSpinner : currentTodo.status === "true" ? faSquareCheck : faSquare}
+																					spin={currentTodo.statusLoading}
+																					className="cursor-pointer mx-1 text-secondary"
+																				/>
+																				{todos[getDate(currentTodo.date) + "_children"] && todos[getDate(currentTodo.date) + "_children"][key] && Object.keys(todos[getDate(currentTodo.date) + "_children"][key]).length ? (
+																					<FontAwesomeIcon
+																						onClick={() => {
+																							setTodos((todos) => {
+																								const { [key]: currentTodo } = todos[date]
+																								return {
+																									...todos,
+																									[date]: {
+																										...todos[date],
+																										[key]: {
+																											...currentTodo,
+																											isCollapsed: !currentTodo.isCollapsed,
+																										},
+																									},
+																								}
+																							})
+																						}}
+																						icon={currentTodo.isCollapsed ? faEyeSlash : faEye}
+																						className="cursor-pointer mx-1 text-primary"
+																					/>
+																				) : (
+																					<></>
+																				)}
+																				<FontAwesomeIcon onClick={() => editItem(currentTodo, false)} icon={faPencil} className="cursor-pointer mx-1 text-info" />
+																				<FontAwesomeIcon
+																					onClick={
+																						!currentTodo.removeLoading
+																							? () => {
+																									setTodos((todos) => {
+																										const { [key]: currentTodo } = todos[date]
+																										return {
+																											...todos,
+																											[date]: {
+																												...todos[date],
+																												[key]: {
+																													...currentTodo,
+																													removeLoading: true,
+																												},
+																											},
+																										}
+																									})
+																									authApi
+																										.post("/api/todo/remove", {
+																											_id: key,
+																										})
+																										.then(() => {
+																											setTodos((todos) => {
+																												const { [key]: currentTodo, ...restTodos } = todos[date]
+																												if (currentTodo)
+																													return {
+																														...todos,
+																														[date]: {
+																															...restTodos,
+																														},
+																													}
+																												else {
+																													const currentImportant = searchItem(todos, key)
+																													if (currentImportant) {
+																														const { [key]: removingCurrentImportant, ...important } = todos.important
+																														return {
+																															...todos,
+																															important,
+																														}
+																													} else return todos
+																												}
+																											})
+																										})
+																							  }
+																							: () => {}
+																					}
+																					icon={currentTodo.removeLoading ? faSpinner : faX}
+																					spin={currentTodo.removeLoading}
+																					className="cursor-pointer mx-1 text-danger"
+																				/>
+																			</Col>
+																			<Collapse in={currentTodo.isCollapsed && todos[getDate(currentTodo.date) + "_children"][key] && Object.keys(todos[getDate(currentTodo.date) + "_children"][key]).length ? true : false} className="mt-3">
+																				<Col sm={12}>
+																					{todos[getDate(currentTodo.date) + "_children"] && todos[getDate(currentTodo.date) + "_children"][key] ? (
+																						<ListGroup>
+																							{Object.keys(todos[getDate(currentTodo.date) + "_children"][key]).map((childKey) => {
+																								const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
+																								return (
+																									<ListGroup.Item key={childKey} className="bg-transparent text-white">
+																										<Row>
+																											<Col sm={9} className="text-center text-sm-start">
+																												{currentChild.details && currentChild.details.length ? (
+																													<FontAwesomeIcon
+																														onClick={() => {
+																															Swal.fire({
+																																html: `<p class="text-white">${currentChild.details}</p>`,
+																																showCancelButton: true,
+																																showConfirmButton: false,
+																																cancelButtonText: "Close",
+																															})
+																														}}
+																														icon={faInfoCircle}
+																														className="cursor-pointer me-2 text-success"
+																													/>
+																												) : (
+																													<></>
+																												)}
+																												{currentChild.title}
+																											</Col>
+																											<Col sm={3} className="text-center text-sm-end">
+																												<FontAwesomeIcon
+																													onClick={
+																														!currentChild.statusLoading
+																															? () => {
+																																	setTodos((todos) => {
+																																		const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
+																																		return {
+																																			...todos,
+																																			[getDate(currentTodo.date) + "_children"]: {
+																																				...todos[getDate(currentTodo.date) + "_children"],
+																																				[key]: {
+																																					...todos[getDate(currentTodo.date) + "_children"][key],
+																																					[childKey]: {
+																																						...currentChild,
+																																						statusLoading: true,
+																																					},
+																																				},
+																																			},
+																																		}
+																																	})
+																																	authApi
+																																		.post("/api/todo/status", {
+																																			_id: childKey,
+																																			to: currentChild.status === "true" ? false : true,
+																																		})
+																																		.then(() => {
+																																			setTodos((todos) => {
+																																				const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
+																																				if (currentChild)
 																																					return {
 																																						...todos,
 																																						[getDate(currentTodo.date) + "_children"]: {
@@ -905,87 +1015,105 @@ const ToDo = () => {
 																																							[key]: {
 																																								...todos[getDate(currentTodo.date) + "_children"][key],
 																																								[childKey]: {
-																																									...todos[getDate(currentTodo.date) + "_children"][key][childKey],
-																																									status: todos[getDate(currentTodo.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
+																																									...currentChild,
+																																									status: currentChild.status === "true" ? "false" : "true",
 																																									statusLoading: false,
 																																								},
 																																							},
 																																						},
 																																					}
-																																				else return todos
-																																			}
+																																				else {
+																																					const currentTodo = searchItem(todos, key)
+																																					if (currentTodo)
+																																						return {
+																																							...todos,
+																																							[getDate(currentTodo.date) + "_children"]: {
+																																								...todos[getDate(currentTodo.date) + "_children"],
+																																								[key]: {
+																																									...todos[getDate(currentTodo.date) + "_children"][key],
+																																									[childKey]: {
+																																										...todos[getDate(currentTodo.date) + "_children"][key][childKey],
+																																										status: todos[getDate(currentTodo.date) + "_children"][key][childKey].status === "true" ? "false" : "true",
+																																										statusLoading: false,
+																																									},
+																																								},
+																																							},
+																																						}
+																																					else return todos
+																																				}
+																																			})
 																																		})
-																																	})
-																														  }
-																														: () => {}
-																												}
-																												icon={currentChild.statusLoading ? faSpinner : currentChild.status === "true" ? faSquareCheck : faSquare}
-																												spin={currentChild.statusLoading}
-																												className="cursor-pointer mx-1 text-secondary"
-																											/>
-																											<FontAwesomeIcon onClick={() => editItem(currentChild, false)} icon={faPencil} className="cursor-pointer mx-1 text-info" />
-																											<FontAwesomeIcon
-																												onClick={
-																													!currentChild.removeLoading
-																														? () => {
-																																setTodos((todos) => {
-																																	const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
-																																	return {
-																																		...todos,
-																																		[getDate(currentTodo.date) + "_children"]: {
-																																			...todos[getDate(currentTodo.date) + "_children"],
-																																			[key]: {
-																																				...todos[getDate(currentTodo.date) + "_children"][key],
-																																				[childKey]: {
-																																					...currentChild,
-																																					removeLoading: true,
+																															  }
+																															: () => {}
+																													}
+																													icon={currentChild.statusLoading ? faSpinner : currentChild.status === "true" ? faSquareCheck : faSquare}
+																													spin={currentChild.statusLoading}
+																													className="cursor-pointer mx-1 text-secondary"
+																												/>
+																												<FontAwesomeIcon onClick={() => editItem(currentChild, false)} icon={faPencil} className="cursor-pointer mx-1 text-info" />
+																												<FontAwesomeIcon
+																													onClick={
+																														!currentChild.removeLoading
+																															? () => {
+																																	setTodos((todos) => {
+																																		const { [childKey]: currentChild } = todos[getDate(currentTodo.date) + "_children"][key]
+																																		return {
+																																			...todos,
+																																			[getDate(currentTodo.date) + "_children"]: {
+																																				...todos[getDate(currentTodo.date) + "_children"],
+																																				[key]: {
+																																					...todos[getDate(currentTodo.date) + "_children"][key],
+																																					[childKey]: {
+																																						...currentChild,
+																																						removeLoading: true,
+																																					},
 																																				},
 																																			},
-																																		},
-																																	}
-																																})
-																																authApi
-																																	.post("/api/todo/remove", {
-																																		_id: childKey,
+																																		}
 																																	})
-																																	.then(() => {
-																																		setTodos((todos) => {
-																																			const { [childKey]: currentChild, ...restChildren } = todos[getDate(currentTodo.date) + "_children"][key]
-																																			return {
-																																				...todos,
-																																				[getDate(currentTodo.date) + "_children"]: {
-																																					...todos[getDate(currentTodo.date) + "_children"],
-																																					[key]: restChildren,
-																																				},
-																																			}
+																																	authApi
+																																		.post("/api/todo/remove", {
+																																			_id: childKey,
 																																		})
-																																	})
-																														  }
-																														: () => {}
-																												}
-																												icon={currentChild.removeLoading ? faSpinner : faX}
-																												spin={currentChild.removeLoading}
-																												className="cursor-pointer mx-1 text-danger"
-																											/>
-																										</Col>
-																									</Row>
-																								</ListGroup.Item>
-																							)
-																						})}
-																					</ListGroup>
-																				) : (
-																					<></>
-																				)}
-																			</Col>
-																		</Collapse>
-																	</Row>
-																</ListGroup.Item>
-															)
-														})}
-													</ListGroup>
-												) : (
-													<></>
-												)}
+																																		.then(() => {
+																																			setTodos((todos) => {
+																																				const { [childKey]: currentChild, ...restChildren } = todos[getDate(currentTodo.date) + "_children"][key]
+																																				return {
+																																					...todos,
+																																					[getDate(currentTodo.date) + "_children"]: {
+																																						...todos[getDate(currentTodo.date) + "_children"],
+																																						[key]: restChildren,
+																																					},
+																																				}
+																																			})
+																																		})
+																															  }
+																															: () => {}
+																													}
+																													icon={currentChild.removeLoading ? faSpinner : faX}
+																													spin={currentChild.removeLoading}
+																													className="cursor-pointer mx-1 text-danger"
+																												/>
+																											</Col>
+																										</Row>
+																									</ListGroup.Item>
+																								)
+																							})}
+																						</ListGroup>
+																					) : (
+																						<></>
+																					)}
+																				</Col>
+																			</Collapse>
+																		</Row>
+																	</ListGroup.Item>
+																)
+															})}
+														</ListGroup>
+													) : (
+														<></>
+													)}
+												</div>
 												<Row className="my-3">
 													<Col className="text-center">
 														<Button variant="success" onClick={addItem}>

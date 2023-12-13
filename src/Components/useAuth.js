@@ -82,7 +82,14 @@ const AuthProvider = ({ children }) => {
 						})
 						setLoggedIn(true)
 						setFormData({})
+						setTransitionStages({
+							...transitionStages,
+							sideAnimation: "fadeIn",
+							formAnimation: "fadeIn",
+							textFade: "fadeIn",
+						})
 						navigate("/todo", { replace: true })
+						// setDisplayLocation(location)
 					})
 					.catch((e) => {
 						setTransitionStages({

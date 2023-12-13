@@ -4,7 +4,7 @@ import { Col, Container, Row } from "react-bootstrap"
 import { useMain } from "../Components/useMain"
 
 const Loading = () => {
-	const { setDisplayLocation, transitionStages, setTransitionStages, location } = useMain()
+	const { setDisplayLocation, transitionStages, setTransitionStages, location, displayLocation } = useMain()
 
 	return (
 		<div className={`login bg-dark bg-gradient text-white min-vh-100 d-flex align-items-center px-0 px-md-5`}>
@@ -14,7 +14,7 @@ const Loading = () => {
 						<Row>
 							<Col
 								sm={12}
-								className={`px-0 px-xl-5 ${transitionStages.formAnimation} text-center`}
+								className={`px-0 px-xl-5 ${transitionStages.formAnimation} text-center ${location.pathname === displayLocation.pathname ? "fadeOut" : "fadeIn"}`}
 								onAnimationEnd={() => {
 									setTransitionStages({
 										...transitionStages,

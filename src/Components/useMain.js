@@ -63,13 +63,45 @@ const MainComponent = ({ children }) => {
 					break
 
 				default:
-					setTransitionStages({
-						...transitionStages,
-						formAnimation: "",
-						sideAnimation: "",
-						textFade: "",
-					})
-					setDisplayLocation(location)
+					switch (displayLocation.pathname) {
+						case "/sign-in":
+							setTransitionStages({
+								...transitionStages,
+								rounded: "rounded-start-5",
+								formAnimation: "fadeIn",
+								sideAnimation: "fadeIn",
+								textFade: "fadeIn",
+							})
+							break
+						case "/sign-up":
+							setTransitionStages({
+								...transitionStages,
+								rounded: "rounded-start-5",
+								formAnimation: "fadeIn",
+								sideAnimation: "fadeIn",
+								textFade: "fadeIn",
+							})
+							break
+						case "/reset-password":
+							setTransitionStages({
+								...transitionStages,
+								rounded: "rounded-start-5",
+								formAnimation: "fadeIn",
+								sideAnimation: "fadeIn",
+								textFade: "fadeIn",
+							})
+							break
+
+						default:
+							setTransitionStages({
+								...transitionStages,
+								rounded: "rounded-start-5",
+								formAnimation: "fadeIn",
+								sideAnimation: "fadeIn",
+								textFade: "fadeIn",
+							})
+							setDisplayLocation(location)
+					}
 			}
 		} else if (location !== displayLocation && (displayLocation.pathname === "/reset-password" || displayLocation.pathname === "/" || displayLocation.pathname === "/todo"))
 			setTransitionStages({
