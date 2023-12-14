@@ -323,8 +323,7 @@ const ToDo = () => {
 					}
 				})
 				.catch((e) => {
-					alert(e)
-					setShowLoading(false)
+					// setShowLoading(false)
 				})
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
