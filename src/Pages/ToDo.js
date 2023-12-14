@@ -322,14 +322,14 @@ const ToDo = () => {
 						})
 					}
 				})
-				.catch(() => {})
+				.catch((e) => {
+					alert(e)
+					setShowLoading(false)
+				})
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [date])
 
-	alert(appLoaded)
-	alert(loggedIn)
-	alert(showLoading)
 	return (
 		<Routes>
 			<Route
