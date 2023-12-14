@@ -22,6 +22,7 @@ const ToDo = () => {
 	const { loggedIn } = useAuth()
 
 	const { authApi, logout } = useAuth()
+
 	const { setDisplayLocation, transitionStages, setTransitionStages, location } = useMain()
 	const searchItem = (o, p) => {
 		let r
@@ -328,6 +329,30 @@ const ToDo = () => {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [date])
+
+	const [preventClosing, setPreventClosing] = useState(0)
+
+	authApi.interceptors.request.use(() => {
+		setPreventClosing((preventClosing) => preventClosing + 1)
+	})
+	authApi.interceptors.response.use(
+		() => {
+			setPreventClosing((preventClosing) => preventClosing - 1)
+		},
+		() => {
+			setPreventClosing((preventClosing) => preventClosing - 1)
+		}
+	)
+	const confirmExit = () => {
+		if (preventClosing) return true
+	}
+	useEffect(() => {
+		window.onbeforeunload = confirmExit
+		return () => {
+			window.onbeforeunload = () => {}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
 
 	return (
 		<Routes>
