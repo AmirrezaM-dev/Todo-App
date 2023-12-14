@@ -359,7 +359,7 @@ const ToDo = () => {
 														<Navbar.Toggle />
 														<Navbar.Collapse className="justify-content-center">
 															<Nav className="mx-auto mt-4 mt-sm-0">
-																<Form.Control className="text-center text-sm-start" type="date" onChange={(e) => setDate(e.target.value)} value={date} placeholder="name@example.com" />
+																<Form.Control className="text-center text-sm-start" type="date" onChange={(e) => setDate(e.target.value && e.target.value.length ? e.target.value : new Date())} value={date} placeholder="name@example.com" />
 															</Nav>
 															<Navbar className="justify-content-center justify-content-sm-center">
 																<Navbar.Text>
