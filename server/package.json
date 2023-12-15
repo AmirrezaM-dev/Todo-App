@@ -1,6 +1,6 @@
 {
-	"name": "fit-app",
-	"version": "0.0.1",
+	"name": "todo-app",
+	"version": "0.1.0",
 	"description": "Fit App",
 	"main": "./server.js",
 	"homepage": "./",
