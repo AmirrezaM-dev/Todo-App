@@ -351,8 +351,14 @@ const ToDo = () => {
 					}).then(() => {
 						setUseCategory(true)
 						setCategory(date.toString())
+						setDate(date.toString())
 					})
 				})
+			} else {
+				const currentCategory = categories.filter((category) => category.date === date)
+				if (currentCategory.length) {
+					setCategory(currentCategory[0].date)
+				} else setCategory()
 			}
 		})
 	}
@@ -384,9 +390,12 @@ const ToDo = () => {
 							title: "Successfully deleted!",
 							icon: "success",
 						}).then(() => {
-							if (response.data.category.length) setCategory(response.data.category[0].date)
-							else {
-								setDate("today")
+							if (response.data.category.length) {
+								setCategory(response.data.category[0].date)
+								setDate(response.data.category[0].date)
+								setUseCategory(true)
+							} else {
+								setDate(getDate("today"))
 								setUseCategory(false)
 							}
 						})

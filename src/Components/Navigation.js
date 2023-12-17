@@ -32,7 +32,7 @@ const Navigation = ({ categories, useCategory, setUseCategory, date, setDate, ca
 							}}
 						/>
 						<Form.Select
-							defaultValue={category}
+							value={category}
 							onChange={(e) => {
 								if (!useCategory && e.target.value !== "addNew") setUseCategory(true)
 								if (e.target.value === "addNew") addNewCategory()
@@ -45,10 +45,10 @@ const Navigation = ({ categories, useCategory, setUseCategory, date, setDate, ca
 							<option value="-1" disabled>
 								Select category
 							</option>
-							{categories.map((category, index) => {
+							{categories.map((categori, index) => {
 								return (
-									<option key={index} value={category.date}>
-										{category.title}
+									<option key={index} value={categori.date}>
+										{categori.title}
 									</option>
 								)
 							})}

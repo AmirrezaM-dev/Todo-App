@@ -32,6 +32,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
 	try {
 		const { date } = req.body
 		const user = req.user
+		await ToDO.deleteMany({ user, date })
 		await Category.findOneAndDelete({ user, date })
 		const category = await Category.find({ user })
 		res.status(200).json({ category })
