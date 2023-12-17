@@ -91,37 +91,35 @@ const important = asyncHandler(async (req, res) => {
 })
 const get = asyncHandler(async (req, res) => {
 	try {
-		const { date } = req.body
+		const { date, getImportant } = req.body
 		const user = req.user
 		const ToDos = await ToDO.find({
 			$and: [{ parent: { $exists: false } }, { $or: [{ date }] }, { user }, { isImportant: false }],
-		})
-			.sort({ updatedAt: 1 })
-			.select(["title", "details", "date", "status"])
-		const ToDosChildren = await ToDO.find({
-			$not: { parent: { $type: "null" } },
-			parent: { $exists: true },
-			date,
-			user,
-			isImportant: false,
-		}).select(["title", "details", "date", "parent", "status"])
-		res.status(200).json({ ToDos, ToDosChildren })
-	} catch (error) {
-		res.status(422)
-		throw new Error(`Something went wrong ${error}`)
-	}
-})
-const getImportant = asyncHandler(async (req, res) => {
-	try {
-		const user = req.user
-		const ToDos = await ToDO.find({
-			user,
-			parent: undefined,
-			isImportant: true,
-		})
-			.sort({ updatedAt: 1 })
-			.select(["title", "details", "date", "status"])
-		res.status(200).json({ ToDos })
+		}).select(["title", "details", "date", "status"])
+		if (getImportant) {
+			const ImportantToDos = await ToDO.find({
+				user,
+				parent: undefined,
+				isImportant: true,
+			}).select(["title", "details", "date", "status"])
+			const ToDosChildren = await ToDO.find({
+				$not: { parent: { $type: "null" } },
+				parent: { $exists: true },
+				$or: [{ date }, { parent: { $in: ImportantToDos } }],
+				user,
+				isImportant: false,
+			}).select(["title", "details", "date", "parent", "status"])
+			res.status(200).json({ ToDos, ImportantToDos, ToDosChildren })
+		} else {
+			const ToDosChildren = await ToDO.find({
+				$not: { parent: { $type: "null" } },
+				$or: [{ parent: { $exists: true } }, { parent: { $in: ToDos } }],
+				date,
+				user,
+				isImportant: false,
+			}).select(["title", "details", "date", "parent", "status"])
+			res.status(200).json({ ToDos, ToDosChildren })
+		}
 	} catch (error) {
 		res.status(422)
 		throw new Error(`Something went wrong ${error}`)
@@ -135,5 +133,4 @@ module.exports = {
 	status,
 	important,
 	get,
-	getImportant,
 }

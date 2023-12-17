@@ -12,7 +12,9 @@ const root = ReactDOM.createRoot(document.getElementById("root"))
 root.render(
 	<React.StrictMode>
 		<HashRouter>
+			{/* Main Component is useContext for holding all global variables */}
 			<MainComponent>
+				{/* Auth Provider is useContext for authentication functions */}
 				<AuthProvider>
 					<App />
 				</AuthProvider>

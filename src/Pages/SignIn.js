@@ -11,6 +11,7 @@ const SignIn = () => {
 	const { formData, setFormData, formRef, handleFormData, login } = useAuth()
 	const SignInFunction = (e) => {
 		e.preventDefault()
+		// Validation controller (Empty string = no validation/ False = Invalid / True = Valid)
 		let validations = {
 			usernameValidation: "",
 			passwordValidation: "",
@@ -21,7 +22,9 @@ const SignIn = () => {
 		if (formData.username && formData.password && formData.username.length && formData.password.length) {
 			login(formData)
 		} else {
-			!formData.username || !formData.username.length ? formRef.current.username.focus() : !formData.password || !formData.password.length ? formRef.current.password.focus() : !formData.repeatPassword || !formData.repeatPassword.length ? formRef.current.repeatPassword.focus() : <></>
+			// Next line checks did client wrote username then password and if empty, will focus on the username/password field
+			!formData.username || !formData.username.length ? formRef.current.username.focus() : !formData.password || !formData.password.length ? formRef.current.password.focus() : <></>
+			// Validation for username field
 			!formData.username || !formData.username.length
 				? (validations = {
 						...validations,
@@ -33,6 +36,7 @@ const SignIn = () => {
 						usernameValidation: true,
 						usernameFeedback: "Looks good here.",
 				  })
+			// Validation for password field
 			!formData.password || !formData.password.length
 				? (validations = {
 						...validations,
@@ -51,6 +55,7 @@ const SignIn = () => {
 		})
 	}
 	useEffect(() => {
+		// Reset the validation state every first time that component is rendered
 		setFormData({
 			...formData,
 			usernameValidation: "",
