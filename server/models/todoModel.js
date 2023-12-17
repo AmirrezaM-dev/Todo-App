@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const tokenSchema = mongoose.Schema(
+const todoSchema = mongoose.Schema(
 	{
 		user: {
 			type: mongoose.Schema.Types.ObjectId,
@@ -36,4 +36,4 @@ const tokenSchema = mongoose.Schema(
 	},
 	{ timestamps: true }
 )
-module.exports = mongoose.model("ToDo", tokenSchema)
+module.exports = mongoose.model("ToDo", todoSchema)

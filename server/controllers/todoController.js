@@ -1,6 +1,45 @@
 const asyncHandler = require("express-async-handler")
 const ToDO = require("../models/todoModel")
+const Category = require("../models/categoryModel")
 
+const addCategory = asyncHandler(async (req, res) => {
+	try {
+		const { title } = req.body
+		const user = req.user
+		let categoryData = {
+			title,
+			user,
+			date: new Date(),
+		}
+		const category = await Category.create(categoryData)
+		res.status(200).json({ category })
+	} catch (error) {
+		res.status(422)
+		throw new Error(`Something went wrong ${error}`)
+	}
+})
+const getCategory = asyncHandler(async (req, res) => {
+	try {
+		const user = req.user
+		const category = await Category.find({ user })
+		res.status(200).json({ category })
+	} catch (error) {
+		res.status(422)
+		throw new Error(`Something went wrong ${error}`)
+	}
+})
+const deleteCategory = asyncHandler(async (req, res) => {
+	try {
+		const { date } = req.body
+		const user = req.user
+		await Category.findOneAndDelete({ user, date })
+		const category = await Category.find({ user })
+		res.status(200).json({ category })
+	} catch (error) {
+		res.status(422)
+		throw new Error(`Something went wrong ${error}`)
+	}
+})
 const create = asyncHandler(async (req, res) => {
 	try {
 		const { title, details, parent_id, isImportant, date, status } = req.body
@@ -127,6 +166,9 @@ const get = asyncHandler(async (req, res) => {
 })
 
 module.exports = {
+	addCategory,
+	getCategory,
+	deleteCategory,
 	create,
 	edit,
 	remove,
