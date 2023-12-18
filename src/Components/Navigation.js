@@ -5,24 +5,25 @@ import { useAuth } from "./useAuth"
 const Navigation = ({ categories, useCategory, setUseCategory, date, setDate, category, setCategory, setShowLoading, addNewCategory, getDate }) => {
 	const { logout } = useAuth()
 	return (
-		<Navbar expand={"sm"} data-bs-theme="dark" className="border-bottom mb-3">
+		<Navbar expand={"md"} data-bs-theme="dark" className="border-bottom mb-3">
 			<Container>
 				<Navbar.Brand>To Do App</Navbar.Brand>
 				<Navbar.Toggle />
 				<Navbar.Collapse className="justify-content-center">
-					<Nav className="mx-auto mt-4 mt-sm-0">
+					<Nav className="mx-auto mt-4 mt-md-0">
 						<Form.Control
-							className="text-center text-sm-start me-1"
+							className="text-center text-sm-start me-0 me-md-1"
 							type="date"
 							onChange={(e) => {
-								if (useCategory) setUseCategory(false)
+								setCategory("-1")
+								setUseCategory(false)
 								setDate(e.target.value && e.target.value.length ? e.target.value : new Date())
 							}}
 							value={date.length === 10 ? date : ""}
 							placeholder="name@example.com"
 						/>
 						<Form.Check
-							className="d-flex align-items-center mx-2"
+							className="d-flex align-items-center mx-auto my-2 my-md-0 mx-md-2"
 							type="switch"
 							checked={useCategory}
 							onChange={(e) => {
@@ -33,10 +34,11 @@ const Navigation = ({ categories, useCategory, setUseCategory, date, setDate, ca
 						/>
 						<Form.Select
 							value={category}
+							className="text-center mt-1 mt-md-0"
 							onChange={(e) => {
-								if (!useCategory && e.target.value !== "addNew") setUseCategory(true)
 								if (e.target.value === "addNew") addNewCategory()
 								else {
+									setUseCategory(true)
 									setCategory(e.target.value)
 									setDate(e.target.value)
 								}
