@@ -8,6 +8,8 @@ Features:
 + Sing Up
 + Sign In
 + Add a task related to the selected date
++ Add category / Delete category
++ Add a task related to the category
 + Add a child task related to the selected task
 + Change statuses or Modify or Delete tasks
 + Mark tasks as important (Important tasks appear on every date)
