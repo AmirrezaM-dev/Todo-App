@@ -6,13 +6,18 @@ const addCategory = asyncHandler(async (req, res) => {
 	try {
 		const { title } = req.body
 		const user = req.user
+		const date = new Date()
 		let categoryData = {
 			title,
 			user,
-			date: new Date(),
+			date,
 		}
-		const category = await Category.create(categoryData)
-		res.status(200).json({ category })
+		const verifyDuplicate = await Category.find({ user, date })
+		let category
+		if (verifyDuplicate.length === 0) {
+			category = await Category.create(categoryData)
+			res.status(200).json({ category })
+		} else addCategory(req, res)
 	} catch (error) {
 		res.status(422)
 		throw new Error(`Something went wrong ${error}`)

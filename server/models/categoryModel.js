@@ -13,7 +13,6 @@ const categorySchema = mongoose.Schema(
 		date: {
 			type: Date,
 			required: [true, "Please fill the date field"],
-			unique: true,
 		},
 	},
 	{ timestamps: true }

@@ -396,6 +396,7 @@ const ToDo = () => {
 								setUseCategory(true)
 							} else {
 								setDate(getDate("today"))
+								setCategory("-1")
 								setUseCategory(false)
 							}
 						})
