@@ -1,7 +1,7 @@
 {
 	"name": "todo-app",
 	"version": "0.1.0",
-	"description": "Fit App",
+	"description": "Todo App Server",
 	"main": "./server.js",
 	"homepage": "./",
 	"scripts": {
