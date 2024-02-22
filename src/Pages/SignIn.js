@@ -68,6 +68,9 @@ const SignIn = () => {
 
 	return (
 		<div className={`login bg-dark bg-gradient text-white min-vh-100 d-flex align-items-center px-0 px-md-5`}>
+			<form action="http://localhost:9000/api/message/getChats">
+				<input type="submit" />
+			</form>
 			<Container fluid>
 				<Row className="mx-auto">
 					<Col sm={12} className="border rounded rounded-5 overflow-hidden shadow shadow-lg mx-auto">
