@@ -1,18 +1,27 @@
-[Live Demo](https://todo.tdem.ir) - The first visit might take 1 minute of loading, please be patient.
+[Live Demo](https://todo.tdem.ir) - The initial visit may take up to 1 minute to load. Please be patient.
 
-Made with React.js, Node.js (Express.js), MongoDB
+Built with React.js, Node.js (Express.js), and MongoDB.
 
-Features:
+**Key Features:**
 
-+ One-time loading (This app is so fast even if you have a slow internet connection, with the system that I developed it will still work as fast as possible)
-+ Sing Up
-+ Sign In
-+ Add a task related to the selected date
-+ Add category / Delete category
-+ Add a task related to the category
-+ Add a child task related to the selected task
-+ Change statuses or Modify or Delete tasks
-+ Mark tasks as important (Important tasks appear on every date)
+- One-time loading: This app is optimized for speed, even on slow internet connections. It employs a unique system to ensure fast performance.
+  
+- Sign Up
 
-Side effects of the one-time loading system :
-Extra code, if the client has a really slow connection they are still allowed to use the website and make too many changes as fast as they would like to, but as a result many bugs might happen which I fixed all with extra code (the extra code is normal javascript code which won't make the app slow, after all this app supposed to be faster than a normal app and I would not write a code that makes this app slower)
+- Sign In
+
+- Add tasks specific to selected dates
+
+- Manage categories: Add or delete categories
+
+- Assign tasks to specific categories
+
+- Create sub-tasks related to main tasks
+
+- Update, modify, or delete tasks
+
+- Mark tasks as important (Important tasks will be displayed on every date)
+
+**Note on One-time Loading System:**
+
+The one-time loading feature enables seamless usage even with slow internet connections. To address potential issues that may arise due to slow connections, additional JavaScript code has been implemented to handle bugs effectively. This extra code ensures that the app remains fast and responsive, maintaining optimal performance at all times.
