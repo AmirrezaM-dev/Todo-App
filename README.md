@@ -5,6 +5,8 @@ Built with React.js, Node.js (Express.js), and MongoDB.
 
 **Key Features:**
 
+- Cool animations on authentication pages.
+
 - One-time loading: This app is optimized for speed, even on slow internet connections. It employs a unique system to ensure fast performance.
   
 - Sign Up
